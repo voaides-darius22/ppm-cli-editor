@@ -32,9 +32,9 @@ List *create_slist(void)
     return calloc(1, sizeof(List));
 }
 
-int is_empty_list(List *list)
+uint8_t is_empty_list(const List *list)
 {
-    return list->head == NULL;
+    return !list || list->head == NULL;
 }
 
 void *remove_slist_node(List *list, const void *value, cmp_func cmp_helper)
@@ -63,7 +63,7 @@ void *remove_slist_node(List *list, const void *value, cmp_func cmp_helper)
     return NULL;
 }
 
-SListNode *contains_slist_node(List *list, const void *value, cmp_func cmp_helper)
+SListNode *contains_slist_node(const List *list, const void *value, cmp_func cmp_helper)
 {
     if (!list || is_empty_list(list) || !cmp_helper) {
         return NULL;
@@ -71,7 +71,7 @@ SListNode *contains_slist_node(List *list, const void *value, cmp_func cmp_helpe
 
     SListNode *iter = list->head;
     while (iter) {
-        if (cmp_helper(iter->value, value) == 0) {
+        if (!cmp_helper(iter->value, value)) {
             return iter;
         }
         iter = iter->next;
