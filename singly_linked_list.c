@@ -34,7 +34,7 @@ List *create_slist(void)
 
 uint8_t is_empty_list(const List *list)
 {
-    return !list || list->head == NULL;
+    return list->head == NULL;
 }
 
 void *remove_slist_node(List *list, const void *value, cmp_func cmp_helper)
@@ -111,11 +111,9 @@ List *free_slist(List *list, free_func free_helper)
     if (!list) {
         return list;
     }
-
-    void *value = NULL;
-
+    
     while (!is_empty_list(list)) {
-        value = pop_slist(list);
+        void *value = pop_slist(list);
         if (free_helper) {
             free_helper(value);
         }

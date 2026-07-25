@@ -1,9 +1,46 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "lsys.h"
 #include "io_utils.h"
+#include "queue.h"
 
+// SuccessorDataRule Functions
+LsystemSuccessorRule *create_successor_data(const char *buffer)
+{
+    if (!buffer) {
+        return NULL;
+    }
+
+    LsystemSuccessorRule *data = calloc(1, sizeof(*data));
+    if (!data) {
+        return NULL;
+    }
+
+    data->length = strlen(buffer);
+    data->successor = malloc(data->length + 1);
+    if (!data->successor) {
+        free(data);
+        return NULL;
+    }
+    strcpy(data->successor, buffer);
+    return data;
+}
+
+void free_successor_data(void *ptr)
+{
+    if (!ptr) {
+        return;
+    }
+
+    LsystemSuccessorRule *data = ptr;
+    free(data->successor);
+    free(data);
+    return;
+}
+
+// Lsystem File Functions
 Lsystem *open_lsystem_file(const char *path)
 {
     FILE *fp = fopen(path, "r");
@@ -35,13 +72,15 @@ Lsystem *open_lsystem_file(const char *path)
     fscanf(fp, "%d", &nrules);
     fgetc(fp);
     
-    new_file->rules = create_hash_table(nrules, hash_helper);
+    const uint32_t PRINTABLE_ASCII_CHARS = 95;
+    new_file->rules = create_hash_table(PRINTABLE_ASCII_CHARS, hash_helper);
     if (!new_file->rules) {
         fclose(fp);
         return close_lsystem_file(new_file);
     }
 
-    char *token = NULL, *symbol, *successor;
+    char *token = NULL, *symbol;
+    LsystemSuccessorRule *data;
     for (int i = 0; i < nrules; i++) {
         fgets(buffer, 1024, fp);
         clean_fgets_input(buffer, fp);
@@ -50,29 +89,16 @@ Lsystem *open_lsystem_file(const char *path)
             fclose(fp);
             return close_lsystem_file(new_file);
         }
-
-        // Memory allocation for key
-        symbol = malloc(strlen(token) + 1);
-        if (!symbol) {
-            fclose(fp);
-            return close_lsystem_file(new_file);
-        }
-        strcpy(symbol, token);
-
+        symbol = token;
         token = strtok(NULL, " ");
-        if (!token) {
-            fclose(fp);
-            free(symbol);
-            return close_lsystem_file(new_file);
-        }
-        successor = malloc(strlen(token) + 1);
-        if (!successor) {
+        // Memory allocation for value
+        data = create_successor_data(token);
+        if (!data) {
             free(symbol);
             fclose(fp);
             return close_lsystem_file(new_file);
         }
-        strcpy(successor, token);
-        put(new_file->rules, symbol, successor);
+        put(new_file->rules, symbol, data);
     }
 
     fclose(fp);
@@ -86,7 +112,72 @@ Lsystem *close_lsystem_file(Lsystem *lsys)
     }
 
     free(lsys->axiom);
-    free_hash_table(lsys->rules, free);
+    free_hash_table(lsys->rules, free_successor_data);
     free(lsys);
     return NULL;
+}
+
+char *derive_lsys(const Lsystem *lsys, uint32_t n)
+{
+    if (!lsys) {
+        return NULL;
+    }
+
+    if (!n) {
+        char *derivative = malloc(strlen(lsys->axiom) + 1);
+        if (!derivative) {
+            return NULL;
+        }
+        strcpy(derivative, lsys->axiom);
+        return derivative;
+    }
+
+    Queue queue_slots[2];
+    memset(queue_slots, 0, sizeof(queue_slots));
+   
+    // Initialising the first queue slot with the lsystem axiom
+    uint32_t axiom_length = strlen(lsys->axiom);
+    for (int i = 0; i < axiom_length; i++) {
+        enqueue(&queue_slots[0], &lsys->axiom[i]);
+    }
+
+    char key[2];
+    memset(key, 0, sizeof(key));
+    uint32_t derivative_length;
+
+    for (int i = 0; i < n; i++) {
+        derivative_length = 0;
+        uint8_t index_1 = i % 2;
+        uint8_t index_2 = !index_1;
+        while (!is_empty_queue(&queue_slots[index_1])) {
+            char *char_ptr = (char *)dequeue(&queue_slots[index_1]);
+            key[0] = *char_ptr;
+            LsystemSuccessorRule *value = get(lsys->rules, key);
+            // Checking if the production rule exists
+            if (value) {
+                derivative_length += value->length;
+                for (int j = 0; j < value->length; j++) {
+                    enqueue(&queue_slots[index_2], &value->successor[j]);
+                }
+            } else {
+                enqueue(&queue_slots[index_2], char_ptr);
+                derivative_length++;
+            } 
+        }
+    }
+
+    uint8_t result_index = n % 2;
+    char *derivative = malloc(derivative_length + 1);
+    if (!derivative) {
+        while (!is_empty_queue(&queue_slots[result_index])) {
+            dequeue(&queue_slots[result_index]);
+        }
+        return NULL;
+    }
+
+    derivative[derivative_length] = '\0';
+    for (int i = 0; i < derivative_length; i++) {
+        derivative[i] = *(char *)dequeue(&queue_slots[result_index]);
+    }
+    return derivative; 
 }

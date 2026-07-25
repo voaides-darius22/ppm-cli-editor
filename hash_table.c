@@ -4,17 +4,19 @@
 
 #include "hash_table.h"
 
+#define HASH_MULTIPLIER 31
+
 uint32_t hash_helper(const char *key, uint32_t capacity)
 {
     uint32_t hash_value = 0;
     for (int i = 0; key[i] != '\0'; i++) {
-        hash_value = hash_value * 31 + key[i];
+        hash_value = hash_value * HASH_MULTIPLIER + key[i];
     }
     return hash_value % capacity;
 }
 
 // HashTablePair Functions
-HashTablePair *create_hash_table_node(const char *key, const void *value)
+HashTablePair *create_hash_table_node(const char *key, void *value)
 {
     HashTablePair *new_pair = calloc(1, sizeof(*new_pair));
     if (!new_pair) {
@@ -81,7 +83,7 @@ HashTable *create_hash_table(uint32_t capacity, hash_func hash_helper)
     return new_table;
 }
 
-void *put(HashTable *table, const char *key, const void *value)
+void *put(HashTable *table, const char *key, void *value)
 {
     if (!table || !key) {
         return NULL;
@@ -122,7 +124,7 @@ void *get(const HashTable *table, const char *key)
     return pair->value;
 }
 
-void *remove(HashTable *table, const char *key)
+void *remove_pair(HashTable *table, const char *key)
 {
     if (!table || !key) {
         return NULL;

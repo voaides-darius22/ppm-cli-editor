@@ -1,3 +1,4 @@
+#pragma once
 #include "singly_linked_list.h"
 #include "free_functions.h"
 
