@@ -6,6 +6,9 @@
 #include "io_utils.h"
 #include "queue.h"
 
+#define BUFFER_SIZE 1024
+#define LSYSTEM_SYMBOL_SIZE 2
+
 // SuccessorDataRule Functions
 LsystemSuccessorRule *create_successor_data(const char *buffer)
 {
@@ -43,12 +46,16 @@ void free_successor_data(void *ptr)
 // Lsystem File Functions
 Lsystem *open_lsystem_file(const char *path)
 {
+    if (!path) {
+        return NULL;
+    }
+
     FILE *fp = fopen(path, "r");
     if (!fp) {
         return NULL;
     }
 
-    char buffer[1024];
+    char buffer[BUFFER_SIZE];
 
     Lsystem *new_file = calloc(1, sizeof(*new_file));
     if (!new_file) {
@@ -57,7 +64,7 @@ Lsystem *open_lsystem_file(const char *path)
     }
 
     // Reading lsystem axiom
-    fgets(buffer, 1024, fp);
+    fgets(buffer, BUFFER_SIZE, fp);
     clean_fgets_input(buffer, fp);
 
     new_file->axiom = malloc(strlen(buffer) + 1);
@@ -82,7 +89,7 @@ Lsystem *open_lsystem_file(const char *path)
     char *token = NULL, *symbol;
     LsystemSuccessorRule *data;
     for (int i = 0; i < nrules; i++) {
-        fgets(buffer, 1024, fp);
+        fgets(buffer, BUFFER_SIZE, fp);
         clean_fgets_input(buffer, fp);
         token = strtok(buffer, " ");
         if (!token) {
@@ -141,7 +148,7 @@ char *derive_lsys(const Lsystem *lsys, uint32_t n)
         enqueue(&queue_slots[0], &lsys->axiom[i]);
     }
 
-    char key[2];
+    char key[LSYSTEM_SYMBOL_SIZE];
     memset(key, 0, sizeof(key));
     uint32_t derivative_length;
 
