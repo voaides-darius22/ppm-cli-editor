@@ -143,8 +143,8 @@ HashTable *free_hash_table(HashTable *table, free_func free_helper)
 
     uint32_t capacity = table->capacity;
     for (int i = 0; i < capacity; i++) {
-        List *bucket = table->buckets[i];
-        while (!is_empty_list(bucket)) {
+        SList *bucket = table->buckets[i];
+        while (!is_empty_slist(bucket)) {
             HashTablePair *pair = pop_slist(bucket);
             void *value = free_hash_table_pair(pair);
             if (free_helper && value) {

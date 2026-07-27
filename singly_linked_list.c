@@ -26,20 +26,20 @@ void *free_slist_node(SListNode *node)
     return tmp;
 }
 
-// List Functions
-List *create_slist(void)
+// SList Functions
+SList *create_slist(void)
 {
-    return calloc(1, sizeof(List));
+    return calloc(1, sizeof(SList));
 }
 
-uint8_t is_empty_list(const List *list)
+uint8_t is_empty_slist(const SList *list)
 {
     return list->head == NULL;
 }
 
-void *remove_slist_node(List *list, const void *value, cmp_func cmp_helper)
+void *remove_slist_node(SList *list, const void *value, cmp_func cmp_helper)
 {
-    if (!list || is_empty_list(list) || !cmp_helper) {
+    if (!list || is_empty_slist(list) || !cmp_helper) {
         return NULL;
     }
 
@@ -63,9 +63,9 @@ void *remove_slist_node(List *list, const void *value, cmp_func cmp_helper)
     return NULL;
 }
 
-SListNode *contains_slist_node(const List *list, const void *value, cmp_func cmp_helper)
+SListNode *contains_slist_node(const SList *list, const void *value, cmp_func cmp_helper)
 {
-    if (!list || is_empty_list(list) || !cmp_helper) {
+    if (!list || is_empty_slist(list) || !cmp_helper) {
         return NULL;
     }
 
@@ -80,7 +80,7 @@ SListNode *contains_slist_node(const List *list, const void *value, cmp_func cmp
 }
 
 // Stack Behavior Functions
-void push_slist(List *list, void *value)
+void push_slist(SList *list, void *value)
 {
     if (!list) {
         return;
@@ -95,9 +95,9 @@ void push_slist(List *list, void *value)
     list->head = new_node;
 }
 
-void *pop_slist(List *list)
+void *pop_slist(SList *list)
 {
-    if (!list || is_empty_list(list)) {
+    if (!list || is_empty_slist(list)) {
         return NULL;
     }
 
@@ -106,13 +106,13 @@ void *pop_slist(List *list)
     return free_slist_node(tmp);
 }
 
-List *free_slist(List *list, free_func free_helper)
+SList *free_slist(SList *list, free_func free_helper)
 {
     if (!list) {
         return list;
     }
     
-    while (!is_empty_list(list)) {
+    while (!is_empty_slist(list)) {
         void *value = pop_slist(list);
         if (free_helper) {
             free_helper(value);

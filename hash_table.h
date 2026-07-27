@@ -18,7 +18,7 @@ HashTablePair *create_hash_table_node(const char *key, void *value);
 void *free_hash_table_pair(HashTablePair *pair);
 
 typedef struct HashTable {
-    List **buckets;
+    SList **buckets;
     uint32_t capacity;
     hash_func hash_helper;
 } HashTable;

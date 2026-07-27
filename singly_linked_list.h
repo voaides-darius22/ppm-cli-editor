@@ -13,18 +13,18 @@ typedef struct SListNode {
 SListNode *create_slist_node(void *value);
 void *free_slist_node(SListNode *node);
 
-typedef struct List {
+typedef struct SList {
     SListNode *head;
-} List;
+} SList;
 
-// List Functions
-List *create_slist(void);
-uint8_t is_empty_list(const List *list);
-void *remove_slist_node(List *list, const void *value, cmp_func cmp_helper);
-SListNode *contains_slist_node(const List *list, const void *value, cmp_func cmp_helper);
+// SList Functions
+SList *create_slist(void);
+uint8_t is_empty_slist(const SList *list);
+void *remove_slist_node(SList *list, const void *value, cmp_func cmp_helper);
+SListNode *contains_slist_node(const SList *list, const void *value, cmp_func cmp_helper);
 
 // Stack Behavior Functions
-void push_slist(List *list, void *value);
-void *pop_slist(List *list);
+void push_slist(SList *list, void *value);
+void *pop_slist(SList *list);
 
-List *free_slist(List *list, free_func free_helper);
+SList *free_slist(SList *list, free_func free_helper);
