@@ -172,7 +172,7 @@ char *derive_lsys(const Lsystem *lsys, uint32_t n)
             } 
         }
     }
-
+    
     uint8_t result_index = n % 2;
     char *derivative = malloc(derivative_length + 1);
     if (!derivative) {

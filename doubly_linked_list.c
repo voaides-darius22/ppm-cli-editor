@@ -74,7 +74,7 @@ void insert_dlist_node(DList *list, void *value, int32_t pos)
 
 DListNode *find_dlist_node(const DList *list, int32_t pos)
 {
-    if (!list || is_empty_dlist(list) || pos < 0 || pos >= list->size) {
+    if (!list || pos < 0 || pos >= list->size) {
         return NULL;
     }
 
