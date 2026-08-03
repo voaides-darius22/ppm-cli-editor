@@ -20,8 +20,8 @@ typedef struct SList {
 // SList Functions
 SList *create_slist(void);
 uint8_t is_empty_slist(const SList *list);
-void *remove_slist_node(SList *list, const void *value, cmp_func cmp_helper);
-SListNode *contains_slist_node(const SList *list, const void *value, cmp_func cmp_helper);
+void *remove_slist_node(SList *list, const void *value, CmpHandler cmp_helper);
+SListNode *contains_slist_node(const SList *list, const void *value, CmpHandler cmp_helper);
 
 // Stack Behavior Functions
 void push_slist(SList *list, void *value);

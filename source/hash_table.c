@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "hash_table.h"
+#include "../header_files/hash_table.h"
 
 #define HASH_MULTIPLIER 31
 

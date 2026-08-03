@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "singly_linked_list.h"
+#include "../header_files/singly_linked_list.h"
 
 // SListNode Functions
 SListNode *create_slist_node(void *value)
@@ -37,7 +37,7 @@ uint8_t is_empty_slist(const SList *list)
     return list->head == NULL;
 }
 
-void *remove_slist_node(SList *list, const void *value, cmp_func cmp_helper)
+void *remove_slist_node(SList *list, const void *value, CmpHandler cmp_helper)
 {
     if (!list || is_empty_slist(list) || !cmp_helper) {
         return NULL;
@@ -63,7 +63,7 @@ void *remove_slist_node(SList *list, const void *value, cmp_func cmp_helper)
     return NULL;
 }
 
-SListNode *contains_slist_node(const SList *list, const void *value, cmp_func cmp_helper)
+SListNode *contains_slist_node(const SList *list, const void *value, CmpHandler cmp_helper)
 {
     if (!list || is_empty_slist(list) || !cmp_helper) {
         return NULL;
@@ -107,7 +107,7 @@ void *pop_slist(SList *list)
 }
 
 SList *free_slist(SList *list, free_func free_helper)
-{
+{ 
     if (!list) {
         return list;
     }

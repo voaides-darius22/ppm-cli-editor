@@ -20,4 +20,6 @@ void insert_child(TrieNode *parent, TrieNode *child);
 TrieNode *get_child(const TrieNode *root, char character);
 void insert_word(TrieNode *root, const char *word, void *value);
 uint8_t contains_word(TrieNode *root, const char *word);
+// get_word_value returns the value stored inside the terminal node of the word
+void *get_word_value(TrieNode *root, const char *word);
 TrieNode *free_trie(TrieNode *root, free_func free_helper);

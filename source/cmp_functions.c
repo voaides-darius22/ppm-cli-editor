@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "cmp_functions.h"
-#include "hash_table.h"
+#include "../header_files/cmp_functions.h"
+#include "../header_files/hash_table.h"
 
 uint8_t cmp_hash_table_node(const void *value_1, const void *value_2)
 {

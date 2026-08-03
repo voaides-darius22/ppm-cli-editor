@@ -3,8 +3,8 @@
 #include <limits.h>
 #include <string.h>
 
-#include "ppm.h"
-#include "io_utils.h"
+#include "../header_files/ppm.h"
+#include "../header_files/io_utils.h"
 
 #define BUFFER_SIZE 1024
 

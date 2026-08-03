@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "queue.h"
+#include "../header_files/queue.h"
 
 // Queue Functions
 Queue *create_queue(void)

@@ -15,6 +15,7 @@ void free_successor_data(void *ptr);
 
 typedef struct Lsystem {
     char *axiom;
+    uint32_t nrules;
     HashTable *rules;
 } Lsystem;
 

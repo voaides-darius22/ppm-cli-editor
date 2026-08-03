@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "doubly_linked_list.h"
+#include "../header_files/doubly_linked_list.h"
 
 // DListNode Functions
 DListNode *create_dlist_node(void *value)

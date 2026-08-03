@@ -2,9 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "lsys.h"
-#include "io_utils.h"
-#include "queue.h"
+#include "../header_files/lsys.h"
+#include "../header_files/io_utils.h"
+#include "../header_files/queue.h"
 
 #define BUFFER_SIZE 1024
 #define LSYSTEM_SYMBOL_SIZE 2
@@ -77,6 +77,7 @@ Lsystem *open_lsystem_file(const char *path)
     // Reading lsystem rules
     uint32_t nrules;
     fscanf(fp, "%d", &nrules);
+    new_file->nrules = nrules;
     fgetc(fp);
     
     const uint32_t PRINTABLE_ASCII_CHARS = 95;

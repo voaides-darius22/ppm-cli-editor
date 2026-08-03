@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "trie.h"
+#include "../header_files/trie.h"
 
 // TrieNode Functions
 TrieNode *create_trie_node(char character, uint8_t end, void *value)
@@ -93,6 +93,23 @@ uint8_t contains_word(TrieNode *root, const char *word)
         current_node = child;
     }
     return (current_node->end) ? 1 : 0;
+}
+
+void *get_word_value(TrieNode *root, const char *word)
+{
+    if (!root || !word) {
+        return NULL;
+    }
+
+    TrieNode *current_node = root;
+    for (int i = 0; word[i] != '\0'; i++) {
+        TrieNode *child = get_child(current_node, word[i]);
+        if (!child) {
+            return NULL;
+        }
+        current_node = child;
+    }
+    return (current_node->end) ? current_node->value : NULL;
 }
 
 TrieNode *free_trie(TrieNode *root, free_func free_helper)
