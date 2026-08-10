@@ -106,6 +106,14 @@ void *pop_slist(SList *list)
     return free_slist_node(tmp);
 }
 
+void *peek(const SList *list)
+{
+    if (!list || is_empty_slist(list)) {
+        return NULL;
+    }
+    return list->head->value;
+}
+
 SList *free_slist(SList *list, free_func free_helper)
 { 
     if (!list) {

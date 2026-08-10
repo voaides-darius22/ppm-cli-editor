@@ -10,9 +10,8 @@ uint8_t execute_undo(Command *self)
     Invoker *invoker = self->receiver;
     Command *cmd = pop_slist(invoker->undo_stack);
     // Checking if an undoable command has been executed
-    
     if (!cmd) {
-        return !EXECUTE_COMMAND_SUCCEEDED;
+        return EXECUTE_COMMAND_FAILED;
     }
     cmd->undo(cmd);
     push_slist(invoker->redo_stack, cmd);
@@ -35,7 +34,7 @@ Command *create_undo_command(CliEngine *sys, CliArgs *cmd_args)
     if (!cmd) {
         return NULL;
     }
-    cmd->undoable = !TRUE;
+    cmd->undoable = !UNDOABLE;
     cmd->execute = execute_undo;
     cmd->destructor = undo_destructor;
     cmd->receiver = sys->cmd_invoker;
@@ -49,7 +48,7 @@ uint8_t execute_redo(Command *self)
     Command *cmd = pop_slist(invoker->redo_stack);
     // Checking if redo stack contains undoable commands
     if (!cmd) {
-        return !EXECUTE_COMMAND_SUCCEEDED;
+        return EXECUTE_COMMAND_FAILED;
     }
     cmd->execute(cmd);
     push_slist(invoker->undo_stack, cmd);
@@ -72,7 +71,7 @@ Command *create_redo_command(CliEngine *sys, CliArgs *cmd_args)
     if (!cmd) {
         return NULL;
     }
-    cmd->undoable = !TRUE;
+    cmd->undoable = !UNDOABLE;
     cmd->execute = execute_redo;
     cmd->destructor = redo_destructor;
     cmd->receiver = sys->cmd_invoker;
@@ -92,7 +91,7 @@ uint8_t execute_save(Command *self)
     } else {
         printf("No image loaded\n");
     }
-    return !EXECUTE_COMMAND_SUCCEEDED;
+    return EXECUTE_COMMAND_FAILED;
 }
 
 void save_destructor(Command *self)
@@ -108,10 +107,11 @@ Command *create_save_command(CliEngine *sys, CliArgs *cmd_args)
     }
 
     Command *cmd = calloc(1, sizeof(*cmd));
-    cmd->undoable = !TRUE;
+    cmd->undoable = !UNDOABLE;
     cmd->execute = execute_save;
     cmd->destructor = save_destructor;
     cmd->receiver = sys->app_data;
+    cmd->cmd_args = cmd_args;
     return cmd;
 }
 
@@ -139,7 +139,7 @@ Command *create_exit_command(CliEngine *sys, CliArgs *cmd_args)
         return NULL;
     }
 
-    cmd->undoable = !TRUE;
+    cmd->undoable = !UNDOABLE;
     cmd->execute = execute_exit;
     cmd->destructor = exit_destructor;
     cmd->receiver = sys;

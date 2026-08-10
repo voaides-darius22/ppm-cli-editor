@@ -57,22 +57,17 @@ void invoke(Command *cmd, Invoker *self)
         return;
     }
 
-    // Checking if the command is undoable
-    if (cmd->undoable == TRUE) {
+    uint8_t exit_code = cmd->execute(cmd);
+    // Checking if the command is undoable and its execute succeeded
+    if (cmd->undoable && exit_code) {
+        // Clearing redo stack
         while (!is_empty_slist(self->redo_stack)) {
             Command *cmd = pop_slist(self->redo_stack);
             cmd->destructor(cmd);
         }
         push_slist(self->undo_stack, cmd);
+        return;
     }
-    uint8_t execute_status = cmd->execute(cmd);
-    // Checking if the command succeeded to execute
-    if (execute_status == !EXECUTE_COMMAND_SUCCEEDED && cmd->undoable == TRUE) {
-        Command *cmd = pop_slist(self->undo_stack);
-        cmd->destructor(cmd);
-    }
-    // If the command is not undoable it must be cleared from memory
-    if (cmd->undoable == !TRUE) {
-        cmd->destructor(cmd);
-    }
+    // Command is undoable but its execute failed or the command it's not undoable
+    cmd->destructor(cmd);
 }

@@ -63,6 +63,14 @@ Lsystem *open_lsystem_file(const char *path)
         return close_lsystem_file(new_file);
     }
 
+    // Memory allocation for file path
+    new_file->file_path = malloc(strlen(path) + 1);
+    if (!new_file->file_path) {
+        fclose(fp);
+        return close_lsystem_file(new_file);
+    }
+    strcpy(new_file->file_path, path);
+
     // Reading lsystem axiom
     fgets(buffer, BUFFER_SIZE, fp);
     clean_fgets_input(buffer, fp);
@@ -119,6 +127,7 @@ Lsystem *close_lsystem_file(Lsystem *lsys)
         return NULL;
     }
 
+    free(lsys->file_path);
     free(lsys->axiom);
     free_hash_table(lsys->rules, free_successor_data);
     free(lsys);

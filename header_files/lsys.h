@@ -14,6 +14,7 @@ LsystemSuccessorRule *create_successor_data(const char *buffer);
 void free_successor_data(void *ptr);
 
 typedef struct Lsystem {
+    char *file_path;
     char *axiom;
     uint32_t nrules;
     HashTable *rules;

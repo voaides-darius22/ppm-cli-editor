@@ -2,13 +2,15 @@
 
 #include <stdint.h>
 
-#define CMD_MAX_ARGS 8 
-#define TRUE 1
+#define CMD_MAX_ARGS 16 
+#define UNDOABLE 1
+
 #define EXECUTE_COMMAND_SUCCEEDED 1
+#define EXECUTE_COMMAND_FAILED 0
 
 typedef struct CliArgs {
     uint32_t argc;
-    char *argv[CMD_MAX_ARGS];
+    int8_t *argv[CMD_MAX_ARGS];
 } CliArgs;
 // Reminder: argv[0] == cmd_name
 
