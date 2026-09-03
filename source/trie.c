@@ -112,7 +112,7 @@ void *get_word_value(TrieNode *root, const char *word)
     return (current_node->end) ? current_node->value : NULL;
 }
 
-TrieNode *free_trie(TrieNode *root, free_func free_helper)
+TrieNode *free_trie(TrieNode *root, FreeHandler free_helper)
 {
     if (!root) {
         return NULL;

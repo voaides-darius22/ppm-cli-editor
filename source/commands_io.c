@@ -63,12 +63,19 @@ uint8_t execute_lsystem(Command *self)
 {
     SystemData *app_data = self->receiver;
     const char *path = self->cmd_args->argv[1];
-    char *old_lsys_file_path = NULL;
+    // Opening the new .lsys file
+    Lsystem *new_lsys = open_lsystem_file(path);
+    if (!new_lsys) {
+        printf("Failed to load %s\n", path);
+        return EXECUTE_COMMAND_FAILED;
+    }
 
+    char *old_lsys_file_path = NULL;
     // Memento will store the old file path of the lsys file instead of storing the file
     if (app_data->lsys_file) {
         char *old_lsys_file_path = malloc(strlen(app_data->lsys_file->file_path) + 1);
         if (!old_lsys_file_path) {
+            close_lsystem_file(new_lsys);
             printf("Failed to load %s\n", path);
             return EXECUTE_COMMAND_FAILED;
         }
@@ -77,15 +84,8 @@ uint8_t execute_lsystem(Command *self)
         close_lsystem_file(app_data->lsys_file);
     }
     
-    // Opening the new .lsys file
-    Lsystem *new_lsys = open_lsystem_file(path);
-    if (!new_lsys) {
-        printf("Failed to load %s\n", path);
-        free(old_lsys_file_path);
-        return EXECUTE_COMMAND_FAILED;
-    }
-    printf("Loaded %s (L-system with %d rules)\n", path, new_lsys->nrules);
     app_data->lsys_file = new_lsys;
+    printf("Loaded %s (L-system with %d rules)\n", path, new_lsys->nrules);
     return EXECUTE_COMMAND_SUCCEEDED;
 }
 

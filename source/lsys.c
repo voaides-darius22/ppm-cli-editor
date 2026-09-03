@@ -89,7 +89,7 @@ Lsystem *open_lsystem_file(const char *path)
     fgetc(fp);
     
     const uint32_t PRINTABLE_ASCII_CHARS = 95;
-    new_file->rules = create_hash_table(PRINTABLE_ASCII_CHARS, hash_helper);
+    new_file->rules = create_hash_table(PRINTABLE_ASCII_CHARS, hash_default_helper);
     if (!new_file->rules) {
         fclose(fp);
         return close_lsystem_file(new_file);
@@ -104,17 +104,29 @@ Lsystem *open_lsystem_file(const char *path)
         if (!token) {
             fclose(fp);
             return close_lsystem_file(new_file);
+        } else {
+            symbol = malloc(strlen(token) + 1);
+            if (!symbol) {
+                fclose(fp);
+                return close_lsystem_file(new_file);
+            }
+            strcpy(symbol, token);
         }
-        symbol = token;
         token = strtok(NULL, " ");
         // Memory allocation for value
-        data = create_successor_data(token);
-        if (!data) {
+        if (!token) {
             free(symbol);
             fclose(fp);
             return close_lsystem_file(new_file);
+        } else {
+            data = create_successor_data(token);
+            if (!data) {
+                free(symbol);
+                fclose(fp);
+                return close_lsystem_file(new_file);
+            }
+            put(new_file->rules, symbol, data, cmp_hash_key_default);
         }
-        put(new_file->rules, symbol, data);
     }
 
     fclose(fp);
@@ -129,7 +141,7 @@ Lsystem *close_lsystem_file(Lsystem *lsys)
 
     free(lsys->file_path);
     free(lsys->axiom);
-    free_hash_table(lsys->rules, free_successor_data);
+    free_hash_table(lsys->rules, free_successor_data, free);
     free(lsys);
     return NULL;
 }
@@ -169,7 +181,7 @@ char *derive_lsys(const Lsystem *lsys, uint32_t n)
         while (!is_empty_queue(&queue_slots[index_1])) {
             char *char_ptr = (char *)dequeue(&queue_slots[index_1]);
             key[0] = *char_ptr;
-            LsystemSuccessorRule *value = get(lsys->rules, key);
+            LsystemSuccessorRule *value = get(lsys->rules, key, cmp_hash_key_default);
             // Checking if the production rule exists
             if (value) {
                 derivative_length += value->length;

@@ -114,7 +114,7 @@ void *peek(const SList *list)
     return list->head->value;
 }
 
-SList *free_slist(SList *list, free_func free_helper)
+SList *free_slist(SList *list, FreeHandler free_helper)
 { 
     if (!list) {
         return list;

@@ -23,4 +23,4 @@ uint8_t is_empty_dlist(const DList *list);
 void insert_dlist_node(DList *list, void *value, int32_t pos);
 DListNode *find_dlist_node(const DList *list, int32_t pos);
 void *remove_dlist_node(DList *list, int32_t pos);
-DList *free_dlist(DList *list, free_func free_helper);
+DList *free_dlist(DList *list, FreeHandler free_helper);

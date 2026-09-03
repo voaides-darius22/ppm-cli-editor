@@ -27,4 +27,4 @@ SListNode *contains_slist_node(const SList *list, const void *value, CmpHandler 
 void push_slist(SList *list, void *value);
 void *pop_slist(SList *list);
 void *peek(const SList *list);
-SList *free_slist(SList *list, free_func free_helper);
+SList *free_slist(SList *list, FreeHandler free_helper);

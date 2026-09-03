@@ -1,3 +1,3 @@
 #pragma once
-typedef void (*free_func)(void *ptr);
+typedef void (*FreeHandler)(void *ptr);
 

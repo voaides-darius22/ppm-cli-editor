@@ -119,7 +119,7 @@ void *remove_dlist_node(DList *list, int32_t pos)
     return tmp;
 }
 
-DList *free_dlist(DList *list, free_func free_helper)
+DList *free_dlist(DList *list, FreeHandler free_helper)
 {
     if (!list) {
         return NULL;

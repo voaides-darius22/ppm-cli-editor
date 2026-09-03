@@ -52,7 +52,7 @@ void *dequeue(Queue *q)
     return value;
 }
 
-Queue *free_queue(Queue *q, free_func free_helper)
+Queue *free_queue(Queue *q, FreeHandler free_helper)
 {
     if (!q) {
         return NULL;

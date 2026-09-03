@@ -11,4 +11,4 @@ Queue *create_queue(void);
 uint8_t is_empty_queue(const Queue *q);
 void enqueue(Queue *q, void *value);
 void *dequeue(Queue *q);
-Queue *free_queue(Queue *q, free_func free_helper);
+Queue *free_queue(Queue *q, FreeHandler free_helper);

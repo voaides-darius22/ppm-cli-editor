@@ -4,7 +4,7 @@
 #include "../header_files/cmp_functions.h"
 #include "../header_files/hash_table.h"
 
-uint8_t cmp_hash_table_node(const void *value_1, const void *value_2)
+uint8_t cmp_hash_key_default(const void *value_1, const void *value_2)
 {
     if (!value_1 || !value_2) {
         return 0;

@@ -10,7 +10,7 @@
 uint8_t execute_turtle(Command *self)
 {
     SystemData *app_data = self->receiver;
-    int8_t **argv = self->cmd_args->argv;
+    char **argv = self->cmd_args->argv;
     
     // Unpacking turtle arguments
     double x = atof(argv[1]);
@@ -145,9 +145,71 @@ Command *create_turtle_command(CliEngine *sys, CliArgs *cmd_args)
     return cmd;
 }
 
+uint8_t execute_font(Command *self)
+{
+    SystemData *app_data = self->receiver;
+    const char *path = self->cmd_args->argv[1];
+
+    // Opening the new .bdf file
+    Bdf *new_font = open_bdf_font(path);
+    if (!new_font) {
+        printf("Failed to load %s\n", path);
+        return EXECUTE_COMMAND_FAILED;
+    }
+
+    char *old_bdf_file_path = NULL;
+    // Memento will store the old file path of the bdf file instead of storing the file
+    if (app_data->font_file) {
+        old_bdf_file_path = malloc(strlen(app_data->font_file->file_path) + 1);
+        if (!old_bdf_file_path) {
+            close_bdf_font(new_font);
+            printf("Failed to load %s\n", path);
+            return EXECUTE_COMMAND_FAILED;
+        }
+        strcpy(old_bdf_file_path, app_data->font_file->file_path);
+        self->memento = old_bdf_file_path;
+        close_bdf_font(app_data->font_file);
+    }
+    
+    app_data->font_file = new_font;
+    printf("Loaded %s (bitmap font %s)\n", path, new_font->name);
+    return EXECUTE_COMMAND_SUCCEEDED;
+}
+
+void undo_font(Command *self)
+{
+    SystemData *app_data = self->receiver;
+    Bdf *old_file = open_bdf_font((const char *)self->memento);
+    close_bdf_font(app_data->font_file);
+    app_data->font_file = old_file;
+}
+
+void font_destructor(Command *self)
+{
+    // Memento member could have memory allocated for a path of an old .bdf file
+    free(self->memento);
+    free_cli_args(self->cmd_args);
+    free(self);
+}
+
 Command *create_font_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    return NULL;
+    if (!sys || !cmd_args || cmd_args->argc != 2) {
+        return NULL;
+    }
+
+    Command *cmd = calloc(1, sizeof(*cmd));
+    if (!cmd) {
+        return NULL;
+    }
+
+    cmd->undoable = UNDOABLE;
+    cmd->execute = execute_font;
+    cmd->undo = undo_font;
+    cmd->destructor = font_destructor;
+    cmd->receiver = sys->app_data;
+    cmd->cmd_args = cmd_args;
+    return cmd;
 }
 
 Command *create_type_command(CliEngine *sys, CliArgs *cmd_args)

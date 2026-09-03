@@ -10,7 +10,7 @@
 
 typedef struct CliArgs {
     uint32_t argc;
-    int8_t *argv[CMD_MAX_ARGS];
+    char *argv[CMD_MAX_ARGS];
 } CliArgs;
 // Reminder: argv[0] == cmd_name
 
