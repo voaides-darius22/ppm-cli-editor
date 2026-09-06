@@ -94,7 +94,7 @@ void undo_turtle(Command *self)
     Ppm *img = app_data->ppm_file;
     RgbPixel *previous_pixel_buffer = self->memento;
     uint32_t pixels = img->width * img->height;
-    memcpy(img->pixel_buffer, previous_pixel_buffer, pixels * sizeof(*img->pixel_buffer));
+    memcpy(img->pixel_raster, previous_pixel_buffer, pixels * sizeof(*img->pixel_raster));
 }
 
 void turtle_destructor(Command *self)
@@ -130,12 +130,12 @@ Command *create_turtle_command(CliEngine *sys, CliArgs *cmd_args)
 
     Ppm *img = app_data->ppm_file;
     uint32_t pixels = img->width * img->height;
-    cmd->memento = malloc(pixels * sizeof(*img->pixel_buffer));
+    cmd->memento = malloc(pixels * sizeof(*img->pixel_raster));
     if (!cmd->memento) {
         free(cmd);
         return NULL;
     }
-    memcpy(cmd->memento, img->pixel_buffer, pixels * sizeof(*img->pixel_buffer));
+    memcpy(cmd->memento, img->pixel_raster, pixels * sizeof(*img->pixel_raster));
 
     cmd->undoable = UNDOABLE;
     cmd->execute = execute_turtle;
@@ -251,7 +251,7 @@ uint8_t execute_type(Command *self)
         int32_t bottom_left_corner_x = cursor_x + glyph->bbx.BBxoff;
         int32_t bottom_left_corner_y = cursor_y + glyph->bbx.BByoff;
         int32_t bottom_left_corner_offset = bottom_left_corner_y * img->width + bottom_left_corner_x;
-        RgbPixel *bottom_left_pixel = &img->pixel_buffer[bottom_left_corner_offset];
+        RgbPixel *bottom_left_pixel = &img->pixel_raster[bottom_left_corner_offset];
 
         int32_t glyph_padding = compute_glyph_padding(glyph->bbx.BBw);
         int32_t bitmap_row_length = (glyph_padding + glyph->bbx.BBw) / CHAR_BIT;
@@ -292,7 +292,7 @@ void undo_type(Command *self)
     Ppm *img = app_data->ppm_file;
     RgbPixel *previous_pixel_buffer = self->memento;
     uint32_t pixels = img->width * img->height;
-    memcpy(img->pixel_buffer, previous_pixel_buffer, pixels * sizeof(*img->pixel_buffer));
+    memcpy(img->pixel_raster, previous_pixel_buffer, pixels * sizeof(*img->pixel_raster));
 }
 
 void type_destructor(Command *self)
@@ -334,12 +334,12 @@ Command *create_type_command(CliEngine *sys, CliArgs *cmd_args)
     }
 
     uint32_t pixels = img->width * img->height;
-    cmd->memento = malloc(pixels * sizeof(*img->pixel_buffer));
+    cmd->memento = malloc(pixels * sizeof(*img->pixel_raster));
     if (!cmd->memento) {
         free(cmd);
         return NULL;
     }
-    memcpy(cmd->memento, img->pixel_buffer, pixels * sizeof(*img->pixel_buffer));
+    memcpy(cmd->memento, img->pixel_raster, pixels * sizeof(*img->pixel_raster));
 
     cmd->undoable = UNDOABLE;
     cmd->execute = execute_type;

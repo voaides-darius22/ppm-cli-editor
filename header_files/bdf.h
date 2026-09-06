@@ -27,7 +27,6 @@
 #define GLYPHS_FLAG 3 // This flag activates when all glyphs have been processed
 #define ENDFONT_FLAG 4
 
-
 // Glyph Position
 #define VALID_GLYPH_POSITION 1
 

@@ -137,14 +137,14 @@ void draw_line(Ppm *img, TurtlePosition pos_1, TurtlePosition pos_2, RgbPixel co
     int8_t sy = (y0 < y1) ? 1 : -1;
     int32_t err = dx + dy;
 
-    RgbPixel *pixel_buffer = img->pixel_buffer;
+    RgbPixel *pixel_raster = img->pixel_raster;
 
     while (1) {
         // Draw Pixel
         // Computing the offset of the pixel (.ppm img contains a linear buffer)
         if (x0 >= 0 && x0 < img->width && y0 >= 0 && y0 < img->height) {
             uint32_t offset = (img->height - y0 - 1) * img->width + x0;
-            RgbPixel *pixel = &img->pixel_buffer[offset];
+            RgbPixel *pixel = &img->pixel_raster[offset];
             // Changing the pixel color
             *pixel = color;
         }
