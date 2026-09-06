@@ -12,7 +12,6 @@ typedef struct CliArgs {
     uint32_t argc;
     char *argv[CMD_MAX_ARGS];
 } CliArgs;
-// Reminder: argv[0] == cmd_name
 
 CliArgs *cli_tokenizer(char *cli_input);
 CliArgs *free_cli_args(CliArgs *cmd_args);

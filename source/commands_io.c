@@ -10,7 +10,7 @@
 uint8_t execute_load(Command *self)
 {
     SystemData *app_data = self->receiver;
-    const char *path = self->cmd_args->argv[1];
+    const char *path = self->cmd_args->argv[0];
     
     Ppm *new_img = open_ppm_file(path);
     if (!new_img) {
@@ -41,7 +41,7 @@ void load_destructor(Command *self)
 
 Command *create_load_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 2) {
+    if (!sys || !cmd_args || cmd_args->argc != 1) {
         return NULL;
     }
 
@@ -62,7 +62,7 @@ Command *create_load_command(CliEngine *sys, CliArgs *cmd_args)
 uint8_t execute_lsystem(Command *self)
 {
     SystemData *app_data = self->receiver;
-    const char *path = self->cmd_args->argv[1];
+    const char *path = self->cmd_args->argv[0];
     // Opening the new .lsys file
     Lsystem *new_lsys = open_lsystem_file(path);
     if (!new_lsys) {
@@ -107,7 +107,7 @@ void lsystem_destructor(Command *self)
 
 Command *create_lsystem_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 2) {
+    if (!sys || !cmd_args || cmd_args->argc != 1) {
         return NULL;
     }
 
@@ -133,7 +133,7 @@ uint8_t execute_derive(Command *self)
         printf("No L-system loaded\n");
         return EXECUTE_COMMAND_FAILED;
     }
-    uint32_t n = atoi(self->cmd_args->argv[1]);
+    uint32_t n = atoi(self->cmd_args->argv[0]);
     char *derivative = derive_lsys(lsys_file, n);
     if (derivative) {
         printf("%s\n", derivative);
@@ -150,7 +150,7 @@ void derive_destructor(Command *self)
 
 Command *create_derive_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 2) {
+    if (!sys || !cmd_args || cmd_args->argc != 1) {
         return NULL;
     }
 

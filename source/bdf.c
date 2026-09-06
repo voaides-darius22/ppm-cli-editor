@@ -23,13 +23,36 @@ Bbx create_bbx(int32_t BBw, int32_t BBh, int32_t BBxoff, int32_t BByoff)
     return bbx;
 }
 
+int8_t does_bdf_glyph_fit(Ppm *img, int32_t origin_x, int32_t origin_y, BdfGlyph *glyph)
+{
+    if (!img) {
+        return !VALID_GLYPH_POSITION;
+    }
+
+    int32_t bottom_left_corner_x = origin_x + glyph->bbx.BBxoff;
+    int32_t bottom_left_corner_y = origin_y + glyph->bbx.BByoff;
+
+    if (bottom_left_corner_x < 0 || bottom_left_corner_y < 0) {
+        return !VALID_GLYPH_POSITION;
+    }
+
+    int32_t top_right_corner_x = bottom_left_corner_x + glyph->bbx.BBw;
+    int32_t top_right_corner_y = bottom_left_corner_y + glyph->bbx.BBh;
+
+    if (top_right_corner_x >= img->width || top_right_corner_y >= img->height) {
+        return !VALID_GLYPH_POSITION;
+    }
+
+    return VALID_GLYPH_POSITION;
+}
+
 uint32_t hash_bdf_glyph_helper(const void *key, uint32_t capacity)
 {
     const uint16_t encoding = *(const uint16_t *)key;
     return (capacity - encoding % capacity) % capacity;
 }
 
-uint32_t compute_glyph_padding(int32_t BBw)
+int32_t compute_glyph_padding(int32_t BBw)
 {
     return (CHAR_BIT - (BBw % CHAR_BIT)) % CHAR_BIT;  
 }

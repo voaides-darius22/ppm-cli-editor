@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../header_files/io_utils.h"
 #include "../header_files/cli_engine.h"
@@ -94,17 +95,22 @@ uint8_t cli_parser(CliEngine *sys)
     fgets(cli_input, CLI_INPUT_MAX_SIZE, stdin);
     clean_fgets_input(cli_input, stdin);
 
-    CliArgs *cmd_args = cli_tokenizer(cli_input);
-    if (!cmd_args) {
+    // Get command name
+    char *space = strchr(cli_input, ' ');
+    char *cli_input_line_args = NULL;
+    char *cmd_name = cli_input;
+
+    if (space) {
+        *space = '\0';
+        cli_input_line_args = space + 1;
+    }
+
+    CommandConstructor constructor = get_word_value(sys->cmd_trie, cmd_name);
+    if (!constructor) {
         return ERROR_SYSTEM_SIGNAL;
     }
 
-    const char *cmd_name = cmd_args->argv[0];
-    CommandConstructor constructor = get_word_value(sys->cmd_trie, cmd_name);
-    if (!constructor) {
-        free_cli_args(cmd_args);
-        return ERROR_SYSTEM_SIGNAL;
-    }
+    CliArgs *cmd_args = cli_tokenizer(cli_input_line_args);
     Command *cmd = constructor(sys, cmd_args);
     if (!cmd) {
         free_cli_args(cmd_args);

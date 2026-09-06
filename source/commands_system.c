@@ -26,7 +26,7 @@ void undo_destructor(Command *self)
 
 Command *create_undo_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 1) {
+    if (!sys || !cmd_args || cmd_args->argc != 0) {
         return NULL;
     }
 
@@ -63,7 +63,7 @@ void redo_destructor(Command *self)
 
 Command *create_redo_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 1) {
+    if (!sys || !cmd_args || cmd_args->argc != 0) {
         return NULL;
     }
 
@@ -84,7 +84,7 @@ uint8_t execute_save(Command *self)
     SystemData *app_data = self->receiver;
     Ppm *img = app_data->ppm_file;
     if (img) {
-        const char *path = self->cmd_args->argv[1];
+        const char *path = self->cmd_args->argv[0];
         write_ppm_file(path, img);
         printf("Saved %s\n", path);
         return EXECUTE_COMMAND_SUCCEEDED;
@@ -102,7 +102,7 @@ void save_destructor(Command *self)
 
 Command *create_save_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 2) {
+    if (!sys || !cmd_args || cmd_args->argc != 1) {
         return NULL;
     }
 
@@ -130,7 +130,7 @@ void exit_destructor(Command *self)
 
 Command *create_exit_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 1) {
+    if (!sys || !cmd_args || cmd_args->argc != 0) {
         return NULL;
     }
 

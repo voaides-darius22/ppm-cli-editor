@@ -12,4 +12,8 @@ uint8_t execute_font(Command *self);
 void undo_font(Command *self);
 void font_destructor(Command *self);
 Command *create_font_command(CliEngine *sys, CliArgs *cmd_args);
+
+uint8_t execute_type(Command *self);
+void undo_type(Command *self);
+void type_destructor(Command *self);
 Command *create_type_command(CliEngine *sys, CliArgs *cmd_args);

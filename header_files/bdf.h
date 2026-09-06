@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include "ppm.h"
 #include "hash_table.h"
 #include "trie.h"
 #include "io_utils.h"
@@ -26,7 +27,11 @@
 #define GLYPHS_FLAG 3 // This flag activates when all glyphs have been processed
 #define ENDFONT_FLAG 4
 
-// DWidth contains the cursor offset settings after writing a glyph 
+
+// Glyph Position
+#define VALID_GLYPH_POSITION 1
+
+// DWidth contains the cursor offset settings after writing a glyph
 typedef struct {
     int32_t dwx, dwy;
 } DWidth;
@@ -50,8 +55,10 @@ typedef struct {
     int8_t *bitmap;
 } BdfGlyph;
 
+// BdfGlyph Functionss
+int8_t does_bdf_glyph_fit(Ppm *img, int32_t origin_x, int32_t origin_y, BdfGlyph *glyph);
 uint32_t hash_bdf_glyph_helper(const void *key, uint32_t capacity);
-uint32_t compute_glyph_padding(int32_t BBw);
+int32_t compute_glyph_padding(int32_t BBw);
 uint8_t cmp_hash_key_bdf_glyph(const void *value_1, const void *value_2);
 void free_bdf_glyph(void *glyph_ptr);
 

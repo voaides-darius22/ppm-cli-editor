@@ -90,10 +90,10 @@ void write_ppm_file(const char *path, Ppm *ppm)
 
     char buffer[BUFFER_SIZE];
 
-    fwrite(ppm->magic_bytes, sizeof(uint8_t), strlen(ppm->magic_bytes), fp);
+    fwrite(ppm->magic_bytes, sizeof(char), strlen(ppm->magic_bytes), fp);
     putc('\n', fp);
     sprintf(buffer, "%d %d\n%d\n", ppm->width, ppm->height, ppm->max_value_channel);
-    fwrite(buffer, sizeof(uint8_t), strlen(buffer), fp);
+    fwrite(buffer, sizeof(char), strlen(buffer), fp);
     uint32_t pixels = ppm->width * ppm->height;
     fwrite(ppm->pixel_buffer, sizeof(*ppm->pixel_buffer), pixels, fp);
     fclose(fp);

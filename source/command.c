@@ -6,12 +6,11 @@
 
 CliArgs *cli_tokenizer(char *cli_input)
 {
-    if (!cli_input) {
-        return NULL;
-    }
     CliArgs *cmd_args = calloc(1, sizeof(*cmd_args));
     if (!cmd_args) {
         return NULL;
+    } else if (!cli_input) {
+        return cmd_args;
     }
     
     char *token = strtok(cli_input, " ");
