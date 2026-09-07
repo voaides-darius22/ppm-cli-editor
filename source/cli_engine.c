@@ -17,14 +17,14 @@ TrieNode *create_cmd_trie(void)
 
     const char *cmd_name[] = {
         "UNDO", "REDO", "LSYSTEM", "DERIVE", "LOAD", "SAVE", "TURTLE", "FONT",
-        "TYPE", "BITCHECK", "EXIT"
+        "TYPE", "BITCHECK", "EXIT", "GRAYSCALE"
     };
 
     CommandConstructor cmd_constructors[] = {
         create_undo_command,  create_redo_command, create_lsystem_command,
         create_derive_command, create_load_command, create_save_command,
         create_turtle_command, create_font_command, create_type_command,
-        create_bitcheck_command, create_exit_command
+        create_bitcheck_command, create_exit_command, create_grayscale_command
     };
 
     uint32_t num_of_cmd_constructors = sizeof(cmd_name) / sizeof(*cmd_name);
@@ -89,7 +89,7 @@ CliEngine *free_cli_engine(CliEngine *engine)
     return NULL;
 }
 
-uint8_t cli_parser(CliEngine *sys)
+int8_t cli_parser(CliEngine *sys)
 {
     char cli_input[CLI_INPUT_MAX_SIZE];
     fgets(cli_input, CLI_INPUT_MAX_SIZE, stdin);
@@ -107,6 +107,9 @@ uint8_t cli_parser(CliEngine *sys)
 
     CommandConstructor constructor = get_word_value(sys->cmd_trie, cmd_name);
     if (!constructor) {
+        if (*cmd_name) {
+            printf("%s: command not found\n", cmd_name);
+        }
         return ERROR_SYSTEM_SIGNAL;
     }
 

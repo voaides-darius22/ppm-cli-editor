@@ -17,3 +17,8 @@ uint8_t execute_type(Command *self);
 void undo_type(Command *self);
 void type_destructor(Command *self);
 Command *create_type_command(CliEngine *sys, CliArgs *cmd_args);
+
+uint8_t execute_grayscale(Command *self);
+void undo_grayscale(Command *self);
+void grayscale_destructor(Command *self);
+Command *create_grayscale_command(CliEngine *sys, CliArgs *cmd_args);

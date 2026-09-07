@@ -20,7 +20,6 @@ uint8_t execute_undo(Command *self)
 
 void undo_destructor(Command *self)
 {
-    free_cli_args(self->cmd_args);
     free(self);
 }
 
@@ -38,7 +37,7 @@ Command *create_undo_command(CliEngine *sys, CliArgs *cmd_args)
     cmd->execute = execute_undo;
     cmd->destructor = undo_destructor;
     cmd->receiver = sys->cmd_invoker;
-    cmd->cmd_args = cmd_args;
+    free_cli_args(cmd_args);
     return cmd;
 }
 
@@ -57,7 +56,6 @@ uint8_t execute_redo(Command *self)
 
 void redo_destructor(Command *self)
 {
-    free_cli_args(self->cmd_args);
     free(self);
 }
 
@@ -75,7 +73,7 @@ Command *create_redo_command(CliEngine *sys, CliArgs *cmd_args)
     cmd->execute = execute_redo;
     cmd->destructor = redo_destructor;
     cmd->receiver = sys->cmd_invoker;
-    cmd->cmd_args = cmd_args;
+    free_cli_args(cmd_args);
     return cmd;
 }
 
@@ -124,7 +122,6 @@ uint8_t execute_exit(Command *self)
 
 void exit_destructor(Command *self)
 {
-    free_cli_args(self->cmd_args);
     free(self);
 }
 
@@ -143,6 +140,6 @@ Command *create_exit_command(CliEngine *sys, CliArgs *cmd_args)
     cmd->execute = execute_exit;
     cmd->destructor = exit_destructor;
     cmd->receiver = sys;
-    cmd->cmd_args = cmd_args;
+    free_cli_args(cmd_args);
     return cmd;
 }

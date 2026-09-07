@@ -11,13 +11,13 @@
 #define ERROR_SYSTEM_SIGNAL 1
 #define SUCCEED_SYSTEM_SIGNAL 2
 
-typedef struct CliEngine {
+typedef struct CliEngine{
     TrieNode *cmd_trie;
     Invoker *cmd_invoker;
     SystemData *app_data;
 } CliEngine;
 
-uint8_t cli_parser(CliEngine *sys);
+int8_t cli_parser(CliEngine *sys);
 
 typedef Command* (*CommandConstructor)(CliEngine *, CliArgs *);
 

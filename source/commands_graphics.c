@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <math.h>
 
 #include "../header_files/commands_graphics.h"
 #include "../header_files/turtle_graphics.h"
@@ -333,6 +334,7 @@ Command *create_type_command(CliEngine *sys, CliArgs *cmd_args)
         return NULL;
     }
 
+    // Memento will store the previous pixel raster of the image
     uint32_t pixels = img->width * img->height;
     cmd->memento = malloc(pixels * sizeof(*img->pixel_raster));
     if (!cmd->memento) {
@@ -347,5 +349,81 @@ Command *create_type_command(CliEngine *sys, CliArgs *cmd_args)
     cmd->destructor = type_destructor;
     cmd->receiver = app_data;
     cmd->cmd_args = cmd_args;
+    return cmd;
+}
+
+uint8_t execute_grayscale(Command *self)
+{
+    // BT.601 Standard (Broadcasting Service Television)
+    // Luminance Coefficients (Multipliers)
+    const float red_mul = 0.299;
+    const float green_mul = 0.587;
+    const float blue_mul = 0.114;
+
+    SystemData *app_data = self->receiver;
+    Ppm *img = app_data->ppm_file;
+    int32_t pixels = img->width * img->height;
+    for (int i = 0; i < pixels; i++) {
+        RgbPixel *px = &img->pixel_raster[i];
+        // Computing gray luminance
+        uint8_t Y = round(red_mul * px->red_channel + green_mul * px->green_channel + blue_mul *px->blue_channel);
+        RgbPixel new_px = {Y, Y, Y};
+        *px = new_px; 
+    }
+
+    printf("Grayscale filter has been applied\n");
+    return EXECUTE_COMMAND_SUCCEEDED;
+}
+
+void undo_grayscale(Command *self)
+{
+    SystemData *app_data = self->receiver;
+    Ppm *img = app_data->ppm_file;
+    RgbPixel *previous_pixel_buffer = self->memento;
+    uint32_t pixels = img->width * img->height;
+    memcpy(img->pixel_raster, previous_pixel_buffer, pixels * sizeof(*img->pixel_raster));
+}
+
+void grayscale_destructor(Command *self)
+{
+    free(self->memento);
+    free(self);
+}
+
+Command *create_grayscale_command(CliEngine *sys, CliArgs *cmd_args)
+{
+    if (!sys || !cmd_args || cmd_args->argc != 0) {
+        return NULL;
+    }
+
+    SystemData *app_data = sys->app_data;
+    Ppm *img = app_data->ppm_file;
+
+    // Checking if the system has loaded a .ppm img
+    if (!img) {
+        printf("No image loaded\n");
+        return NULL;
+    }
+
+    Command *cmd = calloc(1, sizeof(*cmd));
+    if (!cmd) {
+        return NULL;
+    }
+
+    // Memento will store the previous pixel raster of the image
+    uint32_t pixels = img->width * img->height;
+    cmd->memento = malloc(pixels * sizeof(*img->pixel_raster));
+    if (!cmd->memento) {
+        free(cmd);
+        return NULL;
+    }
+    memcpy(cmd->memento, img->pixel_raster, pixels * sizeof(*img->pixel_raster));
+
+    cmd->undoable = UNDOABLE;
+    cmd->execute = execute_grayscale;
+    cmd->undo = undo_grayscale;
+    cmd->destructor = grayscale_destructor;
+    cmd->receiver = sys->app_data;
+    free_cli_args(cmd_args);
     return cmd;
 }
