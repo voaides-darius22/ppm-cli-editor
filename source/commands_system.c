@@ -11,6 +11,7 @@ uint8_t execute_undo(Command *self)
     Command *cmd = pop_slist(invoker->undo_stack);
     // Checking if an undoable command has been executed
     if (!cmd) {
+        printf("Nothing to undo\n");
         return EXECUTE_COMMAND_FAILED;
     }
     cmd->undo(cmd);
@@ -25,7 +26,12 @@ void undo_destructor(Command *self)
 
 Command *create_undo_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 0) {
+    if (!sys || !cmd_args) {
+        return NULL;
+    }
+
+    if (cmd_args->argc != 0) {
+        printf("Error: UNDO accepts no arguments (%d given)\n", cmd_args->argc);
         return NULL;
     }
 
@@ -36,7 +42,7 @@ Command *create_undo_command(CliEngine *sys, CliArgs *cmd_args)
     cmd->undoable = !UNDOABLE;
     cmd->execute = execute_undo;
     cmd->destructor = undo_destructor;
-    cmd->receiver = sys->cmd_invoker;
+    cmd->receiver = access_invoker(sys);
     free_cli_args(cmd_args);
     return cmd;
 }
@@ -47,6 +53,7 @@ uint8_t execute_redo(Command *self)
     Command *cmd = pop_slist(invoker->redo_stack);
     // Checking if redo stack contains undoable commands
     if (!cmd) {
+        printf("Nothing to redo\n");
         return EXECUTE_COMMAND_FAILED;
     }
     cmd->execute(cmd);
@@ -61,7 +68,12 @@ void redo_destructor(Command *self)
 
 Command *create_redo_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 0) {
+    if (!sys || !cmd_args) {
+        return NULL;
+    }
+
+    if (cmd_args->argc != 0) {
+        printf("Error: UNDO accepts no arguments (%d given)\n", cmd_args->argc);
         return NULL;
     }
 
@@ -72,15 +84,15 @@ Command *create_redo_command(CliEngine *sys, CliArgs *cmd_args)
     cmd->undoable = !UNDOABLE;
     cmd->execute = execute_redo;
     cmd->destructor = redo_destructor;
-    cmd->receiver = sys->cmd_invoker;
+    cmd->receiver = access_invoker(sys);
     free_cli_args(cmd_args);
     return cmd;
 }
 
 uint8_t execute_save(Command *self)
 {
-    SystemData *app_data = self->receiver;
-    Ppm *img = app_data->ppm_file;
+    Ppm **addr_img = self->receiver;
+    Ppm *img = *addr_img;
     if (img) {
         const char *path = self->cmd_args->argv[0];
         write_ppm_file(path, img);
@@ -100,7 +112,13 @@ void save_destructor(Command *self)
 
 Command *create_save_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 1) {
+    if (!sys || !cmd_args) {
+        return NULL;
+    }
+
+    if (cmd_args->argc != 1) {
+        printf("Error: Invalid number of arguments (%d given)\n", cmd_args->argc);
+        printf("Usage: SAVE <file_path>\n");
         return NULL;
     }
 
@@ -108,7 +126,7 @@ Command *create_save_command(CliEngine *sys, CliArgs *cmd_args)
     cmd->undoable = !UNDOABLE;
     cmd->execute = execute_save;
     cmd->destructor = save_destructor;
-    cmd->receiver = sys->app_data;
+    cmd->receiver = get_addr_of_ppm_file(access_appdata(sys));
     cmd->cmd_args = cmd_args;
     return cmd;
 }
@@ -127,7 +145,12 @@ void exit_destructor(Command *self)
 
 Command *create_exit_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 0) {
+    if (!sys || !cmd_args) {
+        return NULL;
+    }
+
+    if (cmd_args->argc != 0) {
+        printf("Error: EXIT accepts no arguments (%d given)\n", cmd_args->argc);
         return NULL;
     }
 

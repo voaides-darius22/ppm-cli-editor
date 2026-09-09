@@ -9,7 +9,19 @@
 #define BUFFER_SIZE 1024
 #define LSYSTEM_SYMBOL_SIZE 2
 
-// SuccessorDataRule Functions
+typedef struct {
+    char *successor;
+    uint32_t length;
+} LsystemSuccessorRule;
+
+typedef struct Lsystem {
+    char *file_path;
+    char *axiom;
+    int32_t nrules;
+    HashTable *rules;
+} Lsystem;
+
+// SuccessorDataRule Constructor
 LsystemSuccessorRule *create_successor_data(const char *buffer)
 {
     if (!buffer) {
@@ -31,6 +43,7 @@ LsystemSuccessorRule *create_successor_data(const char *buffer)
     return data;
 }
 
+// SuccessorDataRule Destructor
 void free_successor_data(void *ptr)
 {
     if (!ptr) {
@@ -43,7 +56,28 @@ void free_successor_data(void *ptr)
     return;
 }
 
-// Lsystem File Functions
+// Lsystem Getters
+char *get_lsystem_path(const Lsystem *lsys)
+{
+    return (lsys) ? lsys->file_path : NULL;
+}
+
+char *get_lsystem_axiom(const Lsystem *lsys)
+{
+    return (lsys) ? lsys->axiom : NULL;
+}
+
+int32_t get_lsystem_num_of_rules(const Lsystem *lsys)
+{
+    return (lsys) ? lsys->nrules : -1;
+}
+
+HashTable *get_lsystem_rules_table(const Lsystem *lsys)
+{
+    return (lsys) ? lsys->rules : NULL;
+}
+
+// Lsystem Constructor
 Lsystem *open_lsystem_file(const char *path)
 {
     if (!path) {
@@ -133,6 +167,7 @@ Lsystem *open_lsystem_file(const char *path)
     return new_file;
 }
 
+// Lsystem Destructor
 Lsystem *close_lsystem_file(Lsystem *lsys)
 {
     if (!lsys) {

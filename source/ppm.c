@@ -2,11 +2,49 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+#include <math.h>
 
 #include "../header_files/ppm.h"
 #include "../header_files/io_utils.h"
 
 #define BUFFER_SIZE 1024
+
+#define PPM_MAX_ARGS 2
+#define PPM_COMMAND_FAILED 0
+#define PPM_COMMAND_SUCCEEDED 1
+#define PPM_FILE_SCANNING 1
+
+#define MAGIC_NUMBER_FLAG 0
+#define DIMENSIONS_FLAG 1
+#define CHANNEL_MAX_VALUE_FLAG 2
+#define PX_RASTER_FLAG 3
+
+typedef int8_t (*PpmReadHandler)(PpmBuilder *);
+
+typedef struct {
+    uint8_t argc;
+    const char *argv[PPM_MAX_ARGS];
+} PpmArgs;
+
+typedef enum {
+    PPM_INIT_STATE,
+    WAITING_MAGIC_NUMBER, WAITING_IMG_DIMENSIONS, WAITING_CHANNEL_MAX_VALUE, WAITING_PX_RASTER,
+    PPM_CLOSING_STATE
+} PpmState;
+
+typedef struct Ppm{
+    char magic_bytes[3];
+    uint32_t width, height;
+    uint8_t max_value_channel;
+    RgbPixel *pixel_raster;
+} Ppm;
+
+typedef struct PpmBuilder{
+    FILE *fp;
+    Ppm *img;
+    PpmState state;
+    int8_t img_flags;
+} PpmBuilder;
 
 PpmArgs ppm_tokenizer(char *ppm_input)
 {
@@ -24,7 +62,7 @@ PpmArgs ppm_tokenizer(char *ppm_input)
     }
 
     char *token = strtok(ppm_input, " ");
-    while (token) {
+    while (token && ppm_args.argc < PPM_MAX_ARGS) {
         ppm_args.argv[ppm_args.argc] = token;
         ppm_args.argc++;
         token = strtok(NULL, " ");
@@ -44,49 +82,7 @@ void ppm_change_state(PpmBuilder *ppm_builder)
     }
 }
 
-PpmReadHandler get_ppm_read_handler(PpmBuilder *ppm_builder)
-{
-    PpmReadHandler handler = NULL;
-    switch (ppm_builder->state) {
-        case WAITING_MAGIC_NUMBER: {handler = read_ppm_magic_number; break;}
-        case WAITING_IMG_DIMENSIONS: {handler = read_ppm_dimensions; break;}
-        case WAITING_CHANNEL_MAX_VALUE: {handler = read_ppm_max_channel_value; break;}
-        case WAITING_PX_RASTER: {handler = read_ppm_px_raster; break;}
-    }
-    return handler;
-}
-
-PpmBuilder *create_ppm_builder(const char *path)
-{
-    if (!path) {
-        return NULL;
-    }
-
-    PpmBuilder *ppm_builder = calloc(1, sizeof(*ppm_builder));
-    if (!ppm_builder) {
-        return NULL;
-    }
-
-    ppm_builder->fp = fopen(path, "rb");
-    if (!ppm_builder->fp) {
-        free(ppm_builder);
-        return NULL;
-    }
-
-    return ppm_builder;
-}
-
-PpmBuilder *free_ppm_builder(PpmBuilder *ppm_builder)
-{
-    if (!ppm_builder) {
-        return NULL;
-    }
-
-    fclose(ppm_builder->fp);
-    free(ppm_builder);
-    return NULL;
-}
-
+// PpmBuilder Functions
 int8_t read_ppm_magic_number(PpmBuilder *ppm_builder)
 {
     if (ppm_builder->state != WAITING_MAGIC_NUMBER) {
@@ -102,10 +98,12 @@ int8_t read_ppm_magic_number(PpmBuilder *ppm_builder)
     PpmArgs ppm_args = ppm_tokenizer(ppm_input);
     if (ppm_args.argc == 1) {
         const char *magic_number_token = ppm_args.argv[0];
-        strncpy(img->magic_bytes, magic_number_token, sizeof(img->magic_bytes) - 1);
-        img->magic_bytes[2] = '\0';
-        // Set magic number flag
-        ppm_builder->img_flags |= (1 << MAGIC_NUMBER_FLAG);
+        if (!strcmp(magic_number_token, "P6")) {
+            strncpy(img->magic_bytes, magic_number_token, sizeof(img->magic_bytes) - 1);
+            img->magic_bytes[2] = '\0';
+            // Set magic number flag
+            ppm_builder->img_flags |= (1 << MAGIC_NUMBER_FLAG);
+        }
     }
     
     free(ppm_input);
@@ -180,6 +178,104 @@ int8_t read_ppm_px_raster(PpmBuilder *ppm_builder)
     return PPM_COMMAND_SUCCEEDED;
 }
 
+PpmReadHandler get_ppm_read_handler(PpmBuilder *ppm_builder)
+{
+    PpmReadHandler handler = NULL;
+    switch (ppm_builder->state) {
+        case WAITING_MAGIC_NUMBER: {handler = read_ppm_magic_number; break;}
+        case WAITING_IMG_DIMENSIONS: {handler = read_ppm_dimensions; break;}
+        case WAITING_CHANNEL_MAX_VALUE: {handler = read_ppm_max_channel_value; break;}
+        case WAITING_PX_RASTER: {handler = read_ppm_px_raster; break;}
+    }
+    return handler;
+}
+
+// PpmBuilder Constructor
+PpmBuilder *create_ppm_builder(const char *path)
+{
+    if (!path) {
+        return NULL;
+    }
+
+    PpmBuilder *ppm_builder = calloc(1, sizeof(*ppm_builder));
+    if (!ppm_builder) {
+        return NULL;
+    }
+
+    ppm_builder->fp = fopen(path, "rb");
+    if (!ppm_builder->fp) {
+        free(ppm_builder);
+        return NULL;
+    }
+
+    return ppm_builder;
+}
+
+// PpmBuilder Destructor
+PpmBuilder *free_ppm_builder(PpmBuilder *ppm_builder)
+{
+    if (!ppm_builder) {
+        return NULL;
+    }
+
+    fclose(ppm_builder->fp);
+    free(ppm_builder);
+    return NULL;
+}
+
+// Ppm Getters
+const char *get_ppm_magic_bytes(const Ppm *img)
+{
+    return (img) ? img->magic_bytes : NULL;
+}
+
+uint32_t get_ppm_width(const Ppm *img)
+{
+    return (img) ? img->width : 0;
+}
+
+uint32_t get_ppm_height(const Ppm *img)
+{
+    return (img) ? img->height : 0;
+}
+
+uint8_t get_ppm_max_value_channel(const Ppm *img)
+{
+    return (img) ? img->max_value_channel : 0;
+}
+
+RgbPixel *get_ppm_px_raster(const Ppm *img)
+{
+    return (img) ? img->pixel_raster : NULL;
+}
+
+
+RgbPixel *clone_pixel_raster(Ppm *img)
+{
+    if (!img) {
+        return NULL;
+    }
+
+    uint32_t pixels = img->width * img->height;
+    RgbPixel *pixel_raster_clone = malloc(pixels * sizeof(RgbPixel));
+    if (!pixel_raster_clone) {
+        return NULL;
+    }
+    memcpy(pixel_raster_clone, img->pixel_raster, pixels * sizeof(RgbPixel));
+    return pixel_raster_clone;
+}
+
+void overwrite_pixel_raster(Ppm *img, RgbPixel *pixel_raster)
+{
+    if (!img || !pixel_raster) {
+        return;
+    }
+
+    uint32_t pixels = img->width * img->height;
+    memcpy(img->pixel_raster, pixel_raster, pixels * sizeof(RgbPixel));
+}
+
+// Ppm Constructor
 Ppm *open_ppm_file(const char *path)
 {
     PpmBuilder *ppm_builder = create_ppm_builder(path);
@@ -224,17 +320,6 @@ Ppm *open_ppm_file(const char *path)
     return img;
 }
 
-Ppm *close_ppm_file(Ppm *ppm)
-{
-    if (!ppm) {
-        return NULL;
-    }
-
-    free(ppm->pixel_raster);
-    free(ppm);
-    return NULL;
-}
-
 void write_ppm_file(const char *path, Ppm *ppm)
 {
     if (!path || !ppm) {
@@ -255,4 +340,37 @@ void write_ppm_file(const char *path, Ppm *ppm)
     uint32_t pixels = ppm->width * ppm->height;
     fwrite(ppm->pixel_raster, sizeof(*ppm->pixel_raster), pixels, fp);
     fclose(fp);
+}
+
+// Ppm Destructor
+Ppm *close_ppm_file(Ppm *ppm)
+{
+    if (!ppm) {
+        return NULL;
+    }
+
+    free(ppm->pixel_raster);
+    free(ppm);
+    return NULL;
+}
+
+RgbPixel pixel_gamma_correction(RgbPixel *px, double gamma)
+{
+    RgbPixel new_px = {0, 0, 0};
+    if (!px) {
+        return new_px;
+    }
+    
+    new_px.red_channel = channel_gamma_correction(px->red_channel, gamma);
+    new_px.green_channel = channel_gamma_correction(px->green_channel, gamma);
+    new_px.blue_channel = channel_gamma_correction(px->blue_channel, gamma);
+
+    return new_px;
+}
+
+uint8_t channel_gamma_correction(uint8_t channel, double gamma)
+{
+    double normalized = channel / 255.0;
+    double corrected = pow(normalized, gamma);
+    return round(corrected * 255);
 }

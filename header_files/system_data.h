@@ -4,11 +4,15 @@
 #include "ppm.h"
 #include "bdf.h"
 
-typedef struct SystemData {
-    Lsystem *lsys_file;
-    Ppm *ppm_file;
-    Bdf *font_file;
-} SystemData;
+typedef struct SystemData SystemData;
 
+// SystemData Getters
+Lsystem **get_addr_of_lsystem_file(SystemData *appdata);
+Ppm **get_addr_of_ppm_file(SystemData *appdata);
+Bdf **get_addr_of_bdf_file(SystemData *appdata);
+
+// SystemData Constructor
 SystemData *create_system_data(void);
-SystemData *free_system_data(SystemData *app_data);
+
+// SystemData Destructor
+SystemData *free_system_data(SystemData *appdata);

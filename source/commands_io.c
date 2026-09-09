@@ -9,39 +9,47 @@
 
 uint8_t execute_load(Command *self)
 {
-    SystemData *app_data = self->receiver;
+    Ppm **addr_img = self->receiver;
     const char *path = self->cmd_args->argv[0];
     
+    // Opening the new .ppm img
     Ppm *new_img = open_ppm_file(path);
     if (!new_img) {
         printf("Failed to load %s\n", path);
         return EXECUTE_COMMAND_FAILED;
     }
-    printf("Loaded %s (PPM image %dx%d)\n", path, new_img->width, new_img->height);
-    self->memento = app_data->ppm_file;
-    app_data->ppm_file = new_img;
+
+    // Memento member will store the previous img
+    self->memento = *addr_img;
+    *addr_img = new_img;
+    printf("Loaded %s (PPM image %dx%d)\n", path, get_ppm_width(new_img), get_ppm_height(new_img));
     return EXECUTE_COMMAND_SUCCEEDED;
 }
 
 void undo_load(Command *self)
 {
-    SystemData *app_data = self->receiver;
-    app_data->ppm_file = close_ppm_file(app_data->ppm_file);
-    // Restore to the previous state of the .ppm file
-    app_data->ppm_file = self->memento;
+    Ppm **addr_img = self->receiver;
+    close_ppm_file(*addr_img);
+    *addr_img = self->memento;
+    self->memento = NULL;
 }
 
 void load_destructor(Command *self)
 {
-    Ppm *img = self->memento;
-    close_ppm_file(img);
+    self->memento = close_ppm_file((Ppm *)self->memento);
     free_cli_args(self->cmd_args);
     free(self);
 }
 
 Command *create_load_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 1) {
+    if (!sys || !cmd_args) {
+        return NULL;
+    }
+
+    if (cmd_args->argc != 1) {
+        printf("Error: Invalid number of arguments (%d given)\n", cmd_args->argc);
+        printf("Usage: LOAD <file_path>\n");
         return NULL;
     }
 
@@ -54,14 +62,14 @@ Command *create_load_command(CliEngine *sys, CliArgs *cmd_args)
     cmd->execute = execute_load;
     cmd->undo = undo_load;
     cmd->destructor = load_destructor;
-    cmd->receiver = sys->app_data;
+    cmd->receiver = get_addr_of_ppm_file(access_appdata(sys));
     cmd->cmd_args = cmd_args;
     return cmd;
 }
 
 uint8_t execute_lsystem(Command *self)
 {
-    SystemData *app_data = self->receiver;
+    Lsystem **addr_lsys = self->receiver;
     const char *path = self->cmd_args->argv[0];
     // Opening the new .lsys file
     Lsystem *new_lsys = open_lsystem_file(path);
@@ -70,31 +78,35 @@ uint8_t execute_lsystem(Command *self)
         return EXECUTE_COMMAND_FAILED;
     }
 
-    char *old_lsys_file_path = NULL;
-    // Memento will store the old file path of the lsys file instead of storing the file
-    if (app_data->lsys_file) {
-        char *old_lsys_file_path = malloc(strlen(app_data->lsys_file->file_path) + 1);
-        if (!old_lsys_file_path) {
+    // Memento member will store the path of the previous .lsys file
+    if (*addr_lsys) {
+        Lsystem *old_file = *addr_lsys;
+        char *old_file_path = malloc(strlen(get_lsystem_path(old_file)) + 1);
+        if (!old_file_path) {
             close_lsystem_file(new_lsys);
             printf("Failed to load %s\n", path);
             return EXECUTE_COMMAND_FAILED;
         }
-        strcpy(old_lsys_file_path, app_data->lsys_file->file_path);
-        self->memento = old_lsys_file_path;
-        close_lsystem_file(app_data->lsys_file);
+        strcpy(old_file_path, get_lsystem_path(old_file));
+        self->memento = old_file_path;
+        // Closing the previous .lsys file
+        close_lsystem_file(old_file);
     }
-    
-    app_data->lsys_file = new_lsys;
-    printf("Loaded %s (L-system with %d rules)\n", path, new_lsys->nrules);
+
+    *addr_lsys = new_lsys;
+    printf("Loaded %s (L-system with %d rules)\n", path, get_lsystem_num_of_rules(new_lsys));
     return EXECUTE_COMMAND_SUCCEEDED;
 }
 
 void undo_lsystem(Command *self)
 {
-    SystemData *app_data = self->receiver;
-    Lsystem *old_file = open_lsystem_file((const char *)self->memento);
-    close_lsystem_file(app_data->lsys_file);
-    app_data->lsys_file = old_file;
+    Lsystem **addr_lsys = self->receiver;
+    Lsystem *current_file = *addr_lsys;
+    // Opening the previous .lsys file
+    *addr_lsys = open_lsystem_file((const char *)self->memento);
+    close_lsystem_file(current_file);
+    free(self->memento);
+    self->memento = NULL;
 }
 
 void lsystem_destructor(Command *self)
@@ -107,7 +119,13 @@ void lsystem_destructor(Command *self)
 
 Command *create_lsystem_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 1) {
+    if (!sys || !cmd_args) {
+        return NULL;
+    }
+
+    if (cmd_args->argc != 1) {
+        printf("Error: Invalid number of arguments (%d given)\n", cmd_args->argc);
+        printf("Usage: LSYSTEM <file_path>\n");
         return NULL;
     }
 
@@ -120,21 +138,20 @@ Command *create_lsystem_command(CliEngine *sys, CliArgs *cmd_args)
     cmd->execute = execute_lsystem;
     cmd->undo = undo_lsystem;
     cmd->destructor = lsystem_destructor;
-    cmd->receiver = sys->app_data;
+    cmd->receiver = get_addr_of_lsystem_file(access_appdata(sys));
     cmd->cmd_args = cmd_args;
     return cmd;
 }
 
 uint8_t execute_derive(Command *self)
 {
-    SystemData *app_data = self->receiver;
-    Lsystem *lsys_file = app_data->lsys_file;
-    if (!lsys_file) {
+    Lsystem **addr_lsys = self->receiver;
+    if (!*addr_lsys) {
         printf("No L-system loaded\n");
         return EXECUTE_COMMAND_FAILED;
     }
     uint32_t n = atoi(self->cmd_args->argv[0]);
-    char *derivative = derive_lsys(lsys_file, n);
+    char *derivative = derive_lsys(*addr_lsys, n);
     if (derivative) {
         printf("%s\n", derivative);
     }
@@ -150,7 +167,13 @@ void derive_destructor(Command *self)
 
 Command *create_derive_command(CliEngine *sys, CliArgs *cmd_args)
 {
-    if (!sys || !cmd_args || cmd_args->argc != 1) {
+    if (!sys || !cmd_args) {
+        return NULL;
+    }
+
+    if (cmd_args->argc != 1) {
+        printf("Error: Invalid number of arguments (%d given)\n", cmd_args->argc);
+        printf("Usage: DERIVE <N>\n");
         return NULL;
     }
 
@@ -162,7 +185,7 @@ Command *create_derive_command(CliEngine *sys, CliArgs *cmd_args)
     cmd->undoable = !UNDOABLE;
     cmd->execute = execute_derive;
     cmd->destructor = derive_destructor;
-    cmd->receiver = sys->app_data;
+    cmd->receiver = get_addr_of_lsystem_file(access_appdata(sys));
     cmd->cmd_args = cmd_args;
     return cmd;
 }
