@@ -13,6 +13,7 @@ typedef struct {
 
 // Ppm Getters
 const char *get_ppm_magic_bytes(const Ppm *img);
+char *get_ppm_path(const Ppm *img);
 uint32_t get_ppm_width(const Ppm *img);
 uint32_t get_ppm_height(const Ppm *img);
 uint8_t get_ppm_max_value_channel(const Ppm *img);

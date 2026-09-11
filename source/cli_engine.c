@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "../header_files/io_utils.h"
 #include "../header_files/cli_engine.h"
@@ -8,7 +9,7 @@
 #include "../header_files/commands_io.h"
 #include "../header_files/commands_system.h"
 
-#define CLI_INPUT_MAX_SIZE 1024
+#define BUFFER_MAX_SIZE 1024
 
 typedef struct CliEngine {
     TrieNode *cmd_trie;
@@ -118,11 +119,49 @@ CliEngine *free_cli_engine(CliEngine *engine)
     return NULL;
 }
 
+void show_cmd_name_with_prefix(TrieNode *cmd_trie, char *prefix)
+{
+    if (!prefix) {
+        return;
+    }
+
+    int32_t prefix_len = strlen(prefix);
+    TrieNode *parent = cmd_trie;
+    for (int i = 0; i < prefix_len; i++) {
+        prefix[i] = toupper(prefix[i]);
+        TrieNode *child = get_child(parent, prefix[i]);
+        if (!child) {
+            return;
+        }
+        parent = child;
+    }
+
+    const int8_t MAX_CMD_NAMES = 8;
+    int32_t len = 0;
+    char *words[MAX_CMD_NAMES], buffer[BUFFER_MAX_SIZE];
+    strcpy(buffer, prefix); 
+    get_words(parent, words, &len, buffer, prefix_len - 1, MAX_CMD_NAMES);    
+
+    if (!len) {
+        return;
+    }
+    
+    // Printing cmd names
+    printf("Do you mean? ");
+    for (int i = 0; i < len; i++) {
+        printf("\"%s\" ", words[i]);
+        // Free the memory that has been allocated for the cmd name
+        free(words[i]);
+    }
+    printf("\n");
+    return;
+}
+
 // CliEngine Parser
 int8_t cli_parser(CliEngine *sys)
 {
-    char cli_input[CLI_INPUT_MAX_SIZE];
-    fgets(cli_input, CLI_INPUT_MAX_SIZE, stdin);
+    char cli_input[BUFFER_MAX_SIZE];
+    fgets(cli_input, BUFFER_MAX_SIZE, stdin);
     clean_fgets_input(cli_input, stdin);
 
     // Get command name
@@ -139,6 +178,7 @@ int8_t cli_parser(CliEngine *sys)
     if (!constructor) {
         if (*cmd_name) {
             printf("%s: command not found\n", cmd_name);
+            show_cmd_name_with_prefix(sys->cmd_trie, cmd_name); 
         }
         return ERROR_SYSTEM_SIGNAL;
     }

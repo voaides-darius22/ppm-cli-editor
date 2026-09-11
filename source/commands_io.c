@@ -31,6 +31,12 @@ void undo_load(Command *self)
     Ppm **addr_img = self->receiver;
     close_ppm_file(*addr_img);
     *addr_img = self->memento;
+    if (*addr_img) {
+        char *path = get_ppm_path(*addr_img);
+        printf("Loaded %s (PPM image %dx%d)\n", path, get_ppm_width(*addr_img), get_ppm_height(*addr_img));
+    } else {
+        printf("No image loaded\n");
+    }
     self->memento = NULL;
 }
 
@@ -104,6 +110,12 @@ void undo_lsystem(Command *self)
     Lsystem *current_file = *addr_lsys;
     // Opening the previous .lsys file
     *addr_lsys = open_lsystem_file((const char *)self->memento);
+    if (*addr_lsys) {
+        char *path = get_lsystem_path(*addr_lsys);
+        printf("Loaded %s (L-system with %d rules)\n", path, get_lsystem_num_of_rules(*addr_lsys));
+    } else {
+        printf("No L-system loaded\n");
+    }
     close_lsystem_file(current_file);
     free(self->memento);
     self->memento = NULL;

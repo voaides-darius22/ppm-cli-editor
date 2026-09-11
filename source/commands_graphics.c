@@ -62,6 +62,11 @@ void undo_turtle(Command *self)
     SystemData *appdata = self->receiver;
     Ppm *img = *get_addr_of_ppm_file(appdata);
     overwrite_pixel_raster(img, (RgbPixel*)self->memento);
+    char **argv = self->cmd_args->argv;
+    printf(
+        "TURTLE %s %s %s %s %s %s %s %s %s has been canceled\n", 
+        argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8]
+    );
     free(self->memento);
     self->memento = NULL;
 }
@@ -149,6 +154,13 @@ void undo_font(Command *self)
     Bdf *old_font = open_bdf_font((const char *)self->memento);
     close_bdf_font(*addr_font);
     *addr_font = old_font;
+    if (old_font) {
+        char *path = get_bdf_font_path(old_font);
+        char *name = get_bdf_font_name(old_font);
+        printf("Loaded %s (bitmap font %s)\n", path, name);
+    } else {
+        printf("No font loaded\n");
+    }
     free(self->memento);
     self->memento = NULL;
 }
@@ -281,6 +293,7 @@ void undo_type(Command *self)
     SystemData *appdata = self->receiver;
     Ppm *img = *get_addr_of_ppm_file(appdata);
     overwrite_pixel_raster(img, (RgbPixel*)self->memento);
+    printf("Text has been removed\n");
     free(self->memento);
     self->memento = NULL;
 }
@@ -374,6 +387,7 @@ void undo_grayscale(Command *self)
     SystemData *appdata = self->receiver;
     Ppm *img = *get_addr_of_ppm_file(appdata);
     overwrite_pixel_raster(img, (RgbPixel*)self->memento);
+    printf("Grayscale filter has been removed\n");
     free(self->memento);
     self->memento = NULL;
 }
@@ -454,6 +468,12 @@ void undo_brightness(Command *self)
     SystemData *appdata = self->receiver;
     Ppm *img = *get_addr_of_ppm_file(appdata);
     overwrite_pixel_raster(img, (RgbPixel*)self->memento);
+    double brightness_level = atof(self->cmd_args->argv[0]);
+    if (brightness_level >= 50) {
+        printf("Image brightness level has been reset (%g%%)\n", 50 - brightness_level);
+    } else {
+        printf("Image brightness level has been reset (+%g%%)\n", 50 - brightness_level);
+    }
     free(self->memento);
     self->memento = NULL;
 }

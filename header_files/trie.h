@@ -23,3 +23,10 @@ uint8_t contains_word(TrieNode *root, const char *word);
 // get_word_value returns the value stored inside the terminal node of the word
 void *get_word_value(TrieNode *root, const char *word);
 TrieNode *free_trie(TrieNode *root, FreeHandler free_helper);
+// get_words will extract all words from the trie
+void get_words(
+    TrieNode *root, 
+    char **words, int32_t *len, 
+    char *buffer, int32_t idx,
+    const int8_t MAX_WORDS
+);

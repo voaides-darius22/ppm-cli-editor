@@ -33,6 +33,7 @@ typedef enum {
 } PpmState;
 
 typedef struct Ppm{
+    char *path;
     char magic_bytes[3];
     uint32_t width, height;
     uint8_t max_value_channel;
@@ -229,6 +230,11 @@ const char *get_ppm_magic_bytes(const Ppm *img)
     return (img) ? img->magic_bytes : NULL;
 }
 
+char *get_ppm_path(const Ppm *img)
+{
+    return (img) ? img->path : NULL;
+}
+
 uint32_t get_ppm_width(const Ppm *img)
 {
     return (img) ? img->width : 0;
@@ -288,7 +294,15 @@ Ppm *open_ppm_file(const char *path)
     if (!img) {
         free_ppm_builder(ppm_builder);
         return NULL;
+    }   
+    // Memory allocation for the path of hte .ppm img
+    img->path = malloc(strlen(path) + 1);
+    if (!img->path) {
+        strcpy(img->path, path);
+        free_ppm_builder(ppm_builder);
+        return NULL;
     }
+    strcpy(img->path, path);
     ppm_builder->img = img;
 
     while (PPM_FILE_SCANNING) {
@@ -349,6 +363,7 @@ Ppm *close_ppm_file(Ppm *ppm)
         return NULL;
     }
 
+    free(ppm->path);
     free(ppm->pixel_raster);
     free(ppm);
     return NULL;

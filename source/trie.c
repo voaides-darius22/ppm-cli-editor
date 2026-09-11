@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../header_files/trie.h"
 
@@ -138,4 +139,40 @@ TrieNode *free_trie(TrieNode *root, FreeHandler free_helper)
     }
     free(root);
     return NULL;
+}
+
+void get_words(
+    TrieNode *root, 
+    char **words, int32_t *len, 
+    char *buffer, int32_t idx,
+    const int8_t MAX_WORDS
+){
+    if (!root || !words || !len || *len >= MAX_WORDS) {
+        return;
+    }
+
+    // Writing the character in buffer 
+    buffer[idx] = root->character;
+    // Checking for terminal node => add word
+    if (root->end) {
+        buffer[idx + 1] = '\0';
+        // Memory allocation for word
+        words[*len] = malloc(strlen(buffer) + 1);
+        if (!words[*len]) {
+            return;
+        }
+        strcpy(words[*len], buffer);
+        (*len)++;
+    }
+
+    // Checking if the node has children
+    if (!root->children) {
+        return;
+    }
+
+    // Iterating through the parent's children
+    for (DListNode *iter = root->children->front; iter != NULL; iter = iter->next) {
+        TrieNode *child = iter->value;
+        get_words(child, words, len, buffer, idx + 1, MAX_WORDS);
+    }
 }
