@@ -442,3 +442,136 @@ Command *create_brightness_command(CliEngine *sys, CliArgs *args)
     }
     return cmd_ctor(1, ppm, args, &BrightnessVTable);
 }
+
+typedef struct PpmMetadata {
+    uint32_t width, height;
+    RgbPixel *pixel_raster;
+} PpmMetadata;
+
+static PpmMetadata *create_ppm_metadata(const Ppm *file)
+{
+    PpmMetadata *mtd = (file) ? malloc(sizeof(PpmMetadata)) : NULL;
+    if (!mtd) {
+        return NULL;
+    }
+
+    mtd->width = get_ppm_width(file);
+    mtd->height = get_ppm_height(file);
+    mtd->pixel_raster = clone_pixel_raster((Ppm*)file);
+    if (!mtd->pixel_raster) {
+        free(mtd);
+        return NULL;
+    }
+
+    return mtd;
+}
+
+static void free_ppm_metadata(PpmMetadata **addr_mtd)
+{
+    PpmMetadata *mtd = (addr_mtd) ? *addr_mtd : NULL;
+    if (!mtd) {
+        return;
+    }
+
+    free(mtd->pixel_raster);
+    free(mtd);
+    *addr_mtd = NULL;
+}
+
+static int8_t execute_crop(Command *self)
+{
+    const Ppm *file = *(Ppm**)get_cmd_receiver(self);
+    PpmMetadata *mtd = create_ppm_metadata(file);
+    if (!mtd) {
+        return 0;
+    }
+    set_cmd_memento(self, mtd);
+    const CliArgs *args = get_cmd_args(self);
+
+    // Unpacking Crop arguments (top-left & bottom-right corners)
+    int32_t x1 = atoi(args->argv[0]);
+    int32_t y1 = atoi(args->argv[1]);
+    int32_t x2 = atoi(args->argv[2]);
+    int32_t y2 = atoi(args->argv[3]);
+
+    int32_t cropped_width = x2 - x1 + 1;
+    int32_t cropped_height = y2 - y1 + 1;
+    // Checking if the position of the corners are valid
+    if (cropped_width <= 0 || cropped_height <= 0) {
+        printf("Top-Left corner is lower than Bottom-Right corner\n");
+        return 0;
+    }
+    if (x1 + cropped_width > mtd->width || y1 + cropped_height > mtd->height) {
+        printf("Corners overflow the image dimension\n");
+        return 0;
+    }
+    
+    // Memory allocation for the cropped pixel raster
+    int32_t crop_pixels = cropped_width * cropped_height;
+    RgbPixel *cropped_pixel_raster = malloc(crop_pixels * sizeof(RgbPixel));
+    if (!cropped_pixel_raster) {
+        return 0;
+    }
+    for (int i = 0; i < cropped_height; i++) {
+        int32_t offset = (y1 + i) * mtd->width + x1;
+        memcpy(
+            cropped_pixel_raster + i * cropped_width,
+            mtd->pixel_raster + offset,
+            cropped_width * sizeof(RgbPixel)
+        );
+    }
+
+    set_ppm_px_raster(
+        (Ppm*)file, 
+        (uint32_t)cropped_width, (uint32_t)cropped_height, 
+        cropped_pixel_raster
+    );
+
+    printf("Image has been cropped to (%dx%d)\n", cropped_width, cropped_height);
+    return 1;
+}
+
+static void undo_crop(Command *self)
+{
+    const Ppm *file = *(Ppm**)get_cmd_receiver(self);
+    const PpmMetadata *mtd = get_cmd_memento(self);
+    printf(
+        "(PPM image %dx%d) has been restored to (%dx%d)\n",
+        get_ppm_width(file), get_ppm_height(file),
+        mtd->width, mtd->height
+    );
+    set_ppm_px_raster((Ppm*)file, mtd->width, mtd->height, mtd->pixel_raster);
+    free((PpmMetadata*)mtd);
+    set_cmd_memento(self, NULL);
+}
+
+static void crop_destructor(Command **self)
+{
+    // Memento will store the metadata of the previous ppm image
+    PpmMetadata *mtd = (PpmMetadata*)get_cmd_memento(*self);
+    free_ppm_metadata(&mtd);
+    set_cmd_memento(*self, NULL);
+}
+
+static const CommandVTable CropVTable = {
+    .execute = execute_crop,
+    .undo = undo_crop,
+    .destroy_cmd = crop_destructor
+};
+
+Command *create_crop_command(CliEngine *sys, CliArgs *args)
+{
+    if (!args || args->argc != 4) {
+        printf("Error: Invalid number of arguments (%d given)\n", args->argc);
+        printf("Usage: CROP <x1> <y1> <x2> <y2>\n");
+        return NULL;
+    }
+
+    const Appdata *appdata = access_appdata(sys);
+    AppFile **ppm = get_file_addr(appdata, PPM);
+    if (!ppm) {
+        printf("No image loaded\n");
+        return NULL;
+    }
+    return cmd_ctor(1, ppm, args, &CropVTable);
+}

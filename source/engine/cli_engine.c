@@ -30,14 +30,14 @@ static TrieNode *cmd_trie_ctor(void)
 
     const char *cmd_name[] = {
         "UNDO", "REDO", "DERIVE", "LOAD", "SAVE", "TURTLE",
-        "TYPE", "BITCHECK", "EXIT", "GRAYSCALE", "BRIGHTNESS"
+        "TYPE", "BITCHECK", "EXIT", "GRAYSCALE", "BRIGHTNESS", "CROP"
     };
 
     CommandConstructor cmd_constructors[] = {
         create_undo_command,  create_redo_command,create_derive_command, 
         create_load_command, create_save_command, create_turtle_command, 
         create_type_command, create_bitcheck_command, create_exit_command, 
-        create_grayscale_command, create_brightness_command
+        create_grayscale_command, create_brightness_command, create_crop_command
     };
 
     uint32_t num_of_cmd_constructors = sizeof(cmd_name) / sizeof(*cmd_name);

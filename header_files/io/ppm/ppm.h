@@ -23,5 +23,10 @@ uint8_t get_ppm_max_value_channel(const Ppm *self);
 RgbPixel *get_ppm_px_raster(const Ppm *self);
 RgbPixel *clone_pixel_raster(Ppm *self);
 void overwrite_pixel_raster(Ppm *self, const RgbPixel *pixel_raster);
+void set_ppm_px_raster(
+    Ppm *self, 
+    uint32_t width, uint32_t height, 
+    RgbPixel *pixel_raster
+);
 RgbPixel pixel_gamma_correction(RgbPixel *px, double gamma);
 uint8_t channel_gamma_correction(uint8_t channel, double gamma);
