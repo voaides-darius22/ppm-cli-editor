@@ -6,9 +6,7 @@
 SListNode *create_slist_node(void *value)
 {
     SListNode *new_node = calloc(1, sizeof(*new_node));
-    if (!new_node) {
-        return NULL;
-    }
+    if (!new_node) { return NULL; }
 
     new_node->value = value;
     return new_node;
@@ -16,9 +14,7 @@ SListNode *create_slist_node(void *value)
 
 void *free_slist_node(SListNode *node)
 {
-    if (!node) {
-        return NULL;
-    }
+    if (!node) { return NULL; }
 
     void *tmp = node->value;
     free(node);
@@ -38,9 +34,7 @@ uint8_t is_empty_slist(const SList *list)
 
 void *remove_slist_node(SList *list, const void *value, CmpHandler cmp_helper)
 {
-    if (!list || is_empty_slist(list) || !cmp_helper) {
-        return NULL;
-    }
+    if (!list || is_empty_slist(list) || !cmp_helper) { return NULL; }
 
     SListNode *prev_node = list->head, *next_node = prev_node->next;
     
@@ -64,9 +58,7 @@ void *remove_slist_node(SList *list, const void *value, CmpHandler cmp_helper)
 
 SListNode *contains_slist_node(const SList *list, const void *value, CmpHandler cmp_helper)
 {
-    if (!list || is_empty_slist(list) || !cmp_helper) {
-        return NULL;
-    }
+    if (!list || is_empty_slist(list) || !cmp_helper) { return NULL; }
 
     SListNode *iter = list->head;
     while (iter) {
@@ -81,14 +73,10 @@ SListNode *contains_slist_node(const SList *list, const void *value, CmpHandler 
 // Stack Behavior Functions
 void push_slist(SList *list, void *value)
 {
-    if (!list) {
-        return;
-    }
+    if (!list) { return; }
 
     SListNode *new_node = create_slist_node(value);
-    if (!new_node) {
-        return;
-    }
+    if (!new_node) { return; }
 
     new_node->next = list->head;
     list->head = new_node;
@@ -96,9 +84,7 @@ void push_slist(SList *list, void *value)
 
 void *pop_slist(SList *list)
 {
-    if (!list || is_empty_slist(list)) {
-        return NULL;
-    }
+    if (!list || is_empty_slist(list)) { return NULL; }
 
     SListNode *tmp = list->head;
     list->head = tmp->next;
@@ -107,17 +93,13 @@ void *pop_slist(SList *list)
 
 void *peek(const SList *list)
 {
-    if (!list || is_empty_slist(list)) {
-        return NULL;
-    }
+    if (!list || is_empty_slist(list)) { return NULL; }
     return list->head->value;
 }
 
 SList *free_slist(SList *list, FreeHandler free_helper)
 { 
-    if (!list) {
-        return list;
-    }
+    if (!list) { return list; }
     
     while (!is_empty_slist(list)) {
         void *value = pop_slist(list);

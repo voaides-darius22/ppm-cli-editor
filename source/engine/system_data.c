@@ -17,9 +17,7 @@ Appdata *appdata_ctor(void)
 void appdata_dtor(Appdata **self)
 {
     Appdata *appdata = (self) ? *self : NULL;
-    if (!appdata) {
-        return;
-    }
+    if (!appdata) { return; }
 
     // Deleting Files
     app_file_dtor(&appdata->lsys);
@@ -31,9 +29,7 @@ void appdata_dtor(Appdata **self)
 
 AppFile **get_file_addr(const Appdata *self, int8_t file_type)
 {
-    if (!self) {
-        return NULL;
-    }
+    if (!self) { return NULL; }
 
     switch (file_type) {
         case LSYSTEM: {return &((Appdata*)self)->lsys;}

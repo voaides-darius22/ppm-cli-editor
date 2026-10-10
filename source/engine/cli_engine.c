@@ -24,20 +24,20 @@ typedef struct CliEngine {
 static TrieNode *cmd_trie_ctor(void)
 {
     TrieNode *cmd_trie_root = create_trie_node('\0', 0, NULL);
-    if (!cmd_trie_root) {
-        return NULL;
-    }
+    if (!cmd_trie_root) { return NULL; }
 
     const char *cmd_name[] = {
         "UNDO", "REDO", "DERIVE", "LOAD", "SAVE", "TURTLE",
-        "TYPE", "BITCHECK", "EXIT", "GRAYSCALE", "BRIGHTNESS", "CROP"
+        "TYPE", "BITCHECK", "EXIT", "GRAYSCALE", "BRIGHTNESS", "CROP",
+        "ROTATE"
     };
 
     CommandConstructor cmd_constructors[] = {
         create_undo_command,  create_redo_command,create_derive_command, 
         create_load_command, create_save_command, create_turtle_command, 
         create_type_command, create_bitcheck_command, create_exit_command, 
-        create_grayscale_command, create_brightness_command, create_crop_command
+        create_grayscale_command, create_brightness_command, create_crop_command,
+        create_rotate_command
     };
 
     uint32_t num_of_cmd_constructors = sizeof(cmd_name) / sizeof(*cmd_name);
@@ -58,9 +58,7 @@ static void cmd_trie_dtor(TrieNode **self)
 void cli_engine_dtor(CliEngine **self)
 {
     CliEngine *engine = (self) ? *self : NULL;
-    if (!engine) {
-        return;
-    }
+    if (!engine) { return; }
 
     cmd_trie_dtor(&engine->cmd_trie);
     invoker_dtor(&engine->invoker);
@@ -72,9 +70,7 @@ void cli_engine_dtor(CliEngine **self)
 CliEngine *cli_engine_ctor(void)
 {
     CliEngine *engine = calloc(1, sizeof(CliEngine));
-    if (!engine) {
-        return NULL;
-    }
+    if (!engine) { return NULL; }
 
     engine->cmd_trie = cmd_trie_ctor();
     if (!engine->cmd_trie) {
@@ -114,18 +110,14 @@ const Appdata *access_appdata(CliEngine *self)
 
 static void show_cmd_name_with_prefix(TrieNode *cmd_trie, char *prefix)
 {
-    if (!prefix) {
-        return;
-    }
+    if (!prefix) { return; }
 
     int32_t prefix_len = strlen(prefix);
     TrieNode *parent = cmd_trie;
     for (int i = 0; i < prefix_len; i++) {
         prefix[i] = toupper(prefix[i]);
         TrieNode *child = get_child(parent, prefix[i]);
-        if (!child) {
-            return;
-        }
+        if (!child) { return; }
         parent = child;
     }
 
@@ -135,9 +127,7 @@ static void show_cmd_name_with_prefix(TrieNode *cmd_trie, char *prefix)
     strcpy(buffer, prefix); 
     get_words(parent, words, &len, buffer, prefix_len - 1, MAX_CMD_NAMES);    
 
-    if (!len) {
-        return;
-    }
+    if (!len) { return; }
     
     // Printing cmd names
     printf("Do you mean? ");

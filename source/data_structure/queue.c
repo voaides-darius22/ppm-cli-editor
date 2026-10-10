@@ -15,14 +15,10 @@ uint8_t is_empty_queue(const Queue *q)
 
 void enqueue(Queue *q, void *value)
 {
-    if (!q) {
-        return;
-    }
+    if (!q) { return; }
 
     SListNode *new_node = create_slist_node(value);
-    if (!new_node) {
-        return;
-    }
+    if (!new_node) { return; }
 
     if (is_empty_queue(q)) {
         q->front = q->rear = new_node;
@@ -35,9 +31,7 @@ void enqueue(Queue *q, void *value)
 
 void *dequeue(Queue *q)
 {
-    if (!q || is_empty_queue(q)) {
-        return NULL;
-    }
+    if (!q || is_empty_queue(q)) { return NULL; }
 
     SListNode *tmp = q->front;
     q->front = tmp->next;
@@ -53,9 +47,7 @@ void *dequeue(Queue *q)
 
 Queue *free_queue(Queue *q, FreeHandler free_helper)
 {
-    if (!q) {
-        return NULL;
-    }
+    if (!q) { return NULL; }
 
     while (!is_empty_queue(q)) {
         void *value = dequeue(q);

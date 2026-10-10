@@ -18,9 +18,7 @@ int main()
 
     while (RUNNING) {
         int8_t signal = cli_parser(sys);
-        if (signal == KILL_SYSTEM_SIGNAL) {
-            break;
-        }
+        if (signal == KILL_SYSTEM_SIGNAL) { break; }
     }
     return 0;
 }

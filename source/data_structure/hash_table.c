@@ -17,9 +17,7 @@ uint32_t hash_default_helper(const void *key, uint32_t capacity)
 HashTablePair *create_hash_table_node(void *key, void *value)
 {
     HashTablePair *new_pair = calloc(1, sizeof(*new_pair));
-    if (!new_pair) {
-        return NULL;
-    }
+    if (!new_pair) { return NULL; }
 
     new_pair->key = key;
     new_pair->value = value;
@@ -28,9 +26,7 @@ HashTablePair *create_hash_table_node(void *key, void *value)
 
 void *free_hash_table_pair(HashTablePair *pair, FreeHandler free_key_helper)
 {
-    if (!pair || !free_key_helper) {
-        return NULL;
-    }
+    if (!pair || !free_key_helper) { return NULL; }
 
     void *tmp = pair->value; 
     if (pair->key) {
@@ -43,9 +39,7 @@ void *free_hash_table_pair(HashTablePair *pair, FreeHandler free_key_helper)
 // HashTable Functions
 HashTable *create_hash_table(uint32_t capacity, HashHandler hash_helper)
 {
-    if (!hash_helper) {
-        return NULL;
-    }
+    if (!hash_helper) { return NULL;}
 
     HashTable *new_table = calloc(1, sizeof(*new_table));
     if (!new_table) {
@@ -78,9 +72,7 @@ HashTable *create_hash_table(uint32_t capacity, HashHandler hash_helper)
 
 void *put(HashTable *table, void *key, void *value, CmpHandler cmp_hash_key_func)
 {
-    if (!table || !key || !cmp_hash_key_func) {
-        return NULL;
-    }
+    if (!table || !key || !cmp_hash_key_func) { return NULL;}
 
     uint32_t index = table->hash_helper(key, table->capacity);    
     
@@ -95,24 +87,18 @@ void *put(HashTable *table, void *key, void *value, CmpHandler cmp_hash_key_func
 
     // Memory allocation for the key-value pair
     HashTablePair *new_pair = create_hash_table_node(key, value);
-    if (!new_pair) {
-        return NULL;
-    }
+    if (!new_pair) { return NULL; }
     push_slist(table->buckets[index], new_pair);
     return NULL;
 }
 
 void *get(const HashTable *table, const void *key, CmpHandler cmp_hash_key_func)
 {
-    if (!table || !key || !cmp_hash_key_func) {
-        return NULL;
-    }
+    if (!table || !key || !cmp_hash_key_func) { return NULL; }
 
     uint32_t index = table->hash_helper(key, table->capacity);
     SListNode *bucket = contains_slist_node(table->buckets[index], key, cmp_hash_key_func);
-    if (!bucket) {
-        return NULL;
-    }
+    if (!bucket) { return NULL; }
     HashTablePair *pair = bucket->value;
     return pair->value;
 }
@@ -122,9 +108,7 @@ void *remove_pair(
     CmpHandler cmp_hash_key_func,
     FreeHandler free_key_helper
 ){
-    if (!table || !key || !cmp_hash_key_func || !free_key_helper) {
-        return NULL;
-    }
+    if (!table || !key || !cmp_hash_key_func || !free_key_helper) { return NULL; }
 
     uint32_t index = table->hash_helper(key, table->capacity);
     HashTablePair *pair = remove_slist_node(table->buckets[index], key, cmp_hash_key_func);
@@ -136,9 +120,7 @@ HashTable *free_hash_table(
     FreeHandler free_value_helper,
     FreeHandler free_key_helper
 ){
-    if (!table || !free_value_helper || !free_key_helper) {
-        return NULL;
-    }
+    if (!table || !free_value_helper || !free_key_helper) { return NULL; }
 
     uint32_t capacity = table->capacity;
     for (int i = 0; i < capacity; i++) {

@@ -53,9 +53,7 @@ Turtle *create_turtle(
     uint16_t orientation, uint8_t angular_step
 ){
     Turtle *turtle = calloc(1, sizeof(*turtle));
-    if (!turtle) {
-        return NULL;
-    }
+    if (!turtle) { return NULL; }
     turtle->current_state.pos = create_turtle_position(x, y);
     turtle->current_state.orientation = orientation;
     turtle->settings = create_turtle_settings(offset_step, angular_step);
@@ -67,15 +65,11 @@ GraphicSystem *create_graphic_system(
     // Turtle Arguments
     double x, double y, uint32_t offset_step, uint16_t orientation , uint8_t angular_step
 ){
-    if (!img) {
-        return NULL;
-    }
+    if (!img) { return NULL; }
 
     // Creating Turtle
     Turtle *turtle = create_turtle(x, y, offset_step, orientation, angular_step);
-    if (!turtle) {
-        return NULL;
-    }
+    if (!turtle) { return NULL; }
 
     // Graphic System Configuration
     GraphicSystem *graphic_system = calloc(1, sizeof(GraphicSystem));
@@ -95,9 +89,7 @@ GraphicSystem *create_graphic_system(
 
 GraphicSystem *close_graphic_system(GraphicSystem *graphic_system)
 {
-    if (!graphic_system) {
-        return NULL;
-    }
+    if (!graphic_system) { return NULL; }
 
     if (graphic_system->turtle) {
         free(graphic_system->turtle);
@@ -115,9 +107,7 @@ GraphicSystem *close_graphic_system(GraphicSystem *graphic_system)
 void add_state(GraphicSystem *graphic_system)
 {
     TurtleState *new_state = calloc(1, sizeof(*new_state));
-    if (!new_state) {
-        return;
-    }
+    if (!new_state) { return; }
     *new_state = graphic_system->turtle->current_state;
     push_slist(graphic_system->states, new_state);
 }
@@ -178,9 +168,9 @@ void draw_line(Ppm *img, TurtlePosition pos_1, TurtlePosition pos_2, RgbPixel co
     int8_t sy = (y0 < y1) ? 1 : -1;
     int32_t err = dx + dy;
 
-    RgbPixel *pixel_raster = get_ppm_px_raster(img);
-    int32_t img_width = get_ppm_width(img);
-    int32_t img_height = get_ppm_height(img); 
+    RgbPixel *pixel_raster = get_img_original_raster(img);
+    int32_t img_width = get_img_width(img);
+    int32_t img_height = get_img_height(img); 
 
     while (1) {
         // Draw Pixel
@@ -192,9 +182,7 @@ void draw_line(Ppm *img, TurtlePosition pos_1, TurtlePosition pos_2, RgbPixel co
             *pixel = color;
         }
         
-        if (x0 == x1 && y0 == y1) {
-            break;
-        }
+        if (x0 == x1 && y0 == y1) { break; }
 
         int32_t e2 = 2 * err;
         if (e2 >= dy) {
@@ -240,9 +228,7 @@ void turtle_parser(char *derivative, GraphicSystem *graphic_system, RgbPixel col
                 remove_state(graphic_system);
                 break;
             }
-            default: {
-                break;
-            }
+            default: { break; }
         }
     }
 }

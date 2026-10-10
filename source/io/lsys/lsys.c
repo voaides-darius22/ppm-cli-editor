@@ -34,9 +34,7 @@ static uint32_t hash_lsys_helper(const void *key, uint32_t capacity)
 
 static uint8_t cmp_hash_key_lsys(const void *value_1, const void *value_2)
 {
-    if (!value_1 || !value_2) {
-        return 0;
-    }
+    if (!value_1 || !value_2) { return 0; }
 
     const char *symbol_1 = ((HashTablePair *)value_1)->key;
     const char *symbol_2 = value_2;
@@ -49,9 +47,7 @@ Lsystem *lsys_ctor(const char *path)
     // .lsys file Configuration
     Lsystem *file = (path) ? calloc(1, sizeof(Lsystem)) : NULL;
     init_file_app((AppFile**)&file, path, &LsystemFileVTable, LSYSTEM);
-    if (!file) {
-        return NULL;
-    }
+    if (!file) { return NULL; }
     // File Loading
     app_file_load((AppFile**)&file);
     return file;
@@ -60,9 +56,7 @@ Lsystem *lsys_ctor(const char *path)
 void lsys_dtor(AppFile **self)
 {
     Lsystem *file = (self) ? (Lsystem *)(*self) : NULL;
-    if (!file) {
-        return;
-    }
+    if (!file) { return; }
     free(file->axiom);
     free_hash_table(file->rules, free_lsys_successor, free);
 }
@@ -71,13 +65,9 @@ void load_lsys(AppFile **self)
 {
     // File Opening (Read Mode)
     const char *path = (self) ? get_app_file_path(*self) : NULL;
-    if (!path) {
-        return;
-    }
+    if (!path) { return; }
     FILE *fp = fopen(path, "r"); 
-    if (!fp) {
-        return;
-    }
+    if (!fp) { return; }
     Lsystem *file = (Lsystem*)*self;
     char buffer[BUFFER_SIZE];
     
@@ -157,9 +147,7 @@ const HashTable *get_lsystem_rules_table(const Lsystem *self)
 
 char *derive_lsys(const Lsystem *self, uint32_t n)
 {
-    if (!self) {
-        return NULL;
-    }
+    if (!self) { return NULL; }
 
     // Checking if the for no derivation
     if (n == 0) {

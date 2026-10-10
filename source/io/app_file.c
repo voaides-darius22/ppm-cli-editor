@@ -42,9 +42,7 @@ void init_file_app(AppFile **self, const char *path, const AppFileVTable *vptr, 
 void app_file_dtor(AppFile **self)
 {
     AppFile *file = (self) ? *self : NULL;
-    if (!file) {
-        return;
-    }
+    if (!file) { return; }
 
     // Calling Virtual Destructor
     if (file->vptr->destroy_file) {
@@ -61,9 +59,7 @@ void app_file_dtor(AppFile **self)
 void app_file_load(AppFile **self)
 {
     AppFile *file = (self) ? *self : NULL;
-    if (!file) {
-        return;
-    }
+    if (!file) { return; }
     file->vptr->load_file(self);
 }
 

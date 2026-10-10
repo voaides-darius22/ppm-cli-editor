@@ -6,9 +6,7 @@
 
 uint8_t cmp_hash_key_default(const void *value_1, const void *value_2)
 {
-    if (!value_1 || !value_2) {
-        return 0;
-    }
+    if (!value_1 || !value_2) { return 0; }
 
     const HashTablePair *ptr_1 = value_1;
     const char *ptr_2 = value_2;

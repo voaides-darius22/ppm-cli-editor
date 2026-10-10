@@ -18,11 +18,8 @@ typedef struct CommandProtected {
 CliArgs *cli_tokenizer(char *cli_input)
 {
     CliArgs *args = calloc(1, sizeof(*args));
-    if (!args) {
-        return NULL;
-    } else if (!cli_input) {
-        return args;
-    }
+    if (!args) { return NULL; } 
+    else if (!cli_input) { return args; }
 
     char *ch = cli_input;
     while (*ch != '\0' && args->argc < MAX_ARGS) {
@@ -83,9 +80,7 @@ CliArgs *cli_tokenizer(char *cli_input)
 void free_cli_args(CliArgs **self)
 {
     CliArgs *args = (self) ? *self : NULL;
-    if (!args) {
-        return;
-    }
+    if (!args) { return; }
 
     uint32_t argc = args->argc;
     for (int i = 0; i < argc; i++) {
@@ -100,9 +95,7 @@ void free_cli_args(CliArgs **self)
 Command *cmd_ctor(int8_t undoable, void *receiver, CliArgs *args, const CommandVTable *vptr)
 {
     Command *cmd = (receiver && vptr) ? calloc(1, sizeof(Command)) : NULL;
-    if (!cmd) {
-        return NULL;
-    }
+    if (!cmd) { return NULL; }
 
     cmd->protected = calloc(1, sizeof(CommandProtected));
     if (!cmd->protected) {
@@ -133,19 +126,18 @@ int8_t is_cmd_undoable(Command *self)
     return (self) ? self->protected->undoable : 0;
 }
 
-const void *get_cmd_memento(Command *self)
+void *get_cmd_memento(Command *self)
 {
     return (self) ? self->protected->memento : NULL;
 }
 
 void set_cmd_memento(Command *self, void *memento)
 {
-    if (self) {
-        self->protected->memento = memento;
-    }
+    if (!self) { return; }
+    self->protected->memento = memento;
 } 
 
-const void *get_cmd_receiver(Command *self)
+void *get_cmd_receiver(Command *self)
 {
     return (self) ? self->protected->receiver : NULL;
 }
@@ -162,8 +154,7 @@ int8_t execute_cmd(Command *self)
 
 void undo_cmd(Command *self)
 {
-    if (is_cmd_undoable(self)) {
-        self->vptr->undo(self);
-    }
+    if (!is_cmd_undoable(self)) { return; }
+    self->vptr->undo(self);
 }
 

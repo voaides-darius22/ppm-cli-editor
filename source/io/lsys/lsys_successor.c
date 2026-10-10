@@ -7,9 +7,7 @@
 LsystemSuccessorRule *create_lsys_successor(const char *succesor_str)
 {
     LsystemSuccessorRule *self = (succesor_str) ? malloc(sizeof(LsystemSuccessorRule)) : NULL;
-    if (!self) {
-        return NULL;
-    }
+    if (!self) { return NULL; }
 
     self->length = strlen(succesor_str);
     self->successor = malloc(self->length + 1);
@@ -24,9 +22,7 @@ LsystemSuccessorRule *create_lsys_successor(const char *succesor_str)
 void free_lsys_successor(void *ptr)
 {
     LsystemSuccessorRule *self = ptr;
-    if (!self) {
-        return;
-    }
+    if (!self) { return; }
     free(self->successor);
     free(self);
 }

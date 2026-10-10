@@ -18,15 +18,11 @@ typedef struct LoadPackage {
 static LoadPackage *create_load_package(int8_t type, AppFile *file)
 {
     // Checking if the file type is valid
-    if (type != LSYSTEM && type != PPM && type != BDF) {
-        return NULL;
-    }
+    if (type != LSYSTEM && type != PPM && type != BDF) { return NULL; }
 
     // Memory allocation for LoadPackage
     LoadPackage *pack = calloc(1, sizeof(LoadPackage));
-    if (!pack) {
-        return NULL;
-    }
+    if (!pack) { return NULL; }
     pack->type = type;
 
     if (type == PPM) {
@@ -51,9 +47,7 @@ static LoadPackage *create_load_package(int8_t type, AppFile *file)
 static void free_load_package(LoadPackage **addr_pack)
 {
     LoadPackage *pack = (addr_pack) ? *addr_pack : NULL;
-    if (!pack) {
-        return;
-    }
+    if (!pack) { return; }
 
     if (pack->type == PPM) {
         app_file_dtor((AppFile**)&pack->data);
@@ -66,7 +60,7 @@ static void free_load_package(LoadPackage **addr_pack)
 
 static int8_t execute_load(Command *self)
 {
-    const Appdata *appdata = get_cmd_receiver(self);
+    Appdata *appdata = get_cmd_receiver(self);
     const CliArgs *args = get_cmd_args(self);
     
     // Loading the new file
@@ -100,8 +94,8 @@ static int8_t execute_load(Command *self)
 
 static void undo_load(Command *self)
 {
-    const Appdata *appdata = get_cmd_receiver(self);
-    const LoadPackage *pack = get_cmd_memento(self);
+    Appdata *appdata = get_cmd_receiver(self);
+    LoadPackage *pack = get_cmd_memento(self);
     // Loading the previous file
     AppFile *previous_file = (pack->type == PPM) ? pack->data : app_file_factory(pack->data);
     // Closing the current file from appdata
@@ -112,8 +106,8 @@ static void undo_load(Command *self)
     if (previous_file && pack->type == PPM) {
         printf(
             "Loaded %s (PPM image %dx%d)\n", 
-            get_app_file_path(previous_file), get_ppm_width((const Ppm*)previous_file), 
-            get_ppm_height((const Ppm*)previous_file)
+            get_app_file_path(previous_file), get_img_width((const Ppm*)previous_file), 
+            get_img_height((const Ppm*)previous_file)
         );
     }
     // If the LoadPackage type is different from PPM => data must be freed
@@ -129,13 +123,11 @@ static void undo_load(Command *self)
 static void load_destructor(Command **self)
 {
     Command *cmd = (self) ? *self : NULL;
-    if (!cmd) {
-        return;
-    }
+    if (!cmd) { return; }
 
     // Memento will contain the LoadPackage
-    const LoadPackage *pack = get_cmd_memento(cmd);
-    free_load_package((LoadPackage**)&pack);
+    LoadPackage *pack = get_cmd_memento(cmd);
+    free_load_package(&pack);
 }
 
 static const CommandVTable LoadVTable = {
@@ -158,19 +150,19 @@ Command *create_load_command(CliEngine *sys, CliArgs *args)
 
 static int8_t execute_derive(Command *self)
 {
-    AppFile *lsys = *(AppFile**)get_cmd_receiver(self);
-    if (!lsys) {
-        printf("No L-system loaded\n");
-        return 0;
-    }
-
+    AppFile *lsys = get_cmd_receiver(self);
+    
+    // Unpacking derive argument
     const CliArgs *args = get_cmd_args(self);
     uint32_t n = atoi(args->argv[0]);
+    
+    // Computing the L-System derivative
     char *derivative = derive_lsys((const Lsystem*)lsys, n);
     if (derivative) {
         printf("%s\n", derivative);
     }
     free(derivative);
+    
     return 1;
 }
 
@@ -189,7 +181,13 @@ Command *create_derive_command(CliEngine *sys, CliArgs *args)
     }
 
     const Appdata *appdata = access_appdata(sys);
-    Command *cmd = cmd_ctor(0, get_file_addr(appdata, LSYSTEM), args, &DeriveVTable);
+    AppFile *lsys = *get_file_addr(appdata, LSYSTEM);
+    if (!lsys) {
+        printf("No L-system loaded\n");
+        return NULL;
+    }
+
+    Command *cmd = cmd_ctor(0, lsys, args, &DeriveVTable);
     return cmd;
 }
 

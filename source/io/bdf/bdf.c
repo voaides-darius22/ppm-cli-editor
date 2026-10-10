@@ -73,9 +73,7 @@ static BdfArgs bdf_tokenizer(char *buffer)
     BdfArgs bdf_args;
     memset(&bdf_args, 0, sizeof(bdf_args));
 
-    if (!buffer) {
-        return bdf_args;
-    }
+    if (!buffer) { return bdf_args; }
 
     char *token = strtok(buffer, " ");
     while (token && bdf_args.argc < MAX_ARGS) {
@@ -89,13 +87,8 @@ static BdfArgs bdf_tokenizer(char *buffer)
 // Bdf State Functions
 static int8_t start_bdf_font(BdfBuilder *builder, BdfArgs bdf_args)
 {
-    if (bdf_args.argc != 1) {
-        return 0;
-    }
-
-    if (builder->state != INIT_STATE) {
-        return 0;
-    }
+    if (bdf_args.argc != 1) { return 0; }
+    if (builder->state != INIT_STATE) { return 0; }
 
     Bdf *font = builder->file;
     const uint32_t capacity = ASCII_TABLE_SIZE;
@@ -113,20 +106,14 @@ static int8_t start_bdf_font(BdfBuilder *builder, BdfArgs bdf_args)
 
 static int8_t set_bdf_font_name(BdfBuilder *builder, BdfArgs bdf_args)
 {
-    if (bdf_args.argc != 1) {
-        return 0;
-    }
+    if (bdf_args.argc != 1) { return 0; }
     
-    if (builder->state != WAITING_FONT_NAME) {
-        return 0;
-    }
+    if (builder->state != WAITING_FONT_NAME) { return 0; }
 
     Bdf *font = builder->file;
     char *name = bdf_args.argv[0];
     font->name = malloc(strlen(name) + 1);
-    if (!font->name) {
-        return 0;
-    }
+    if (!font->name) { return 0; }
     strcpy(font->name, name);
 
     builder->font_flags |= (1 << FONT_NAME_FLAG);
@@ -135,20 +122,13 @@ static int8_t set_bdf_font_name(BdfBuilder *builder, BdfArgs bdf_args)
 
 static int8_t set_bdf_font_nglyphs(BdfBuilder *builder, BdfArgs bdf_args)
 {
-    if (bdf_args.argc != 1) {
-        return 0;
-    }
-
-    if (builder->state != WAITING_NGLYPHS) {
-        return 0;
-    }
+    if (bdf_args.argc != 1) { return 0; }
+    if (builder->state != WAITING_NGLYPHS) { return 0; }
 
     char *nglyphs_token = bdf_args.argv[0];
     Bdf *font = builder->file;
     font->nglyphs = atoi(nglyphs_token);
-    if (font->nglyphs <= 0) {
-        return 0;
-    }
+    if (font->nglyphs <= 0) { return 0; }
     
     builder->font_flags |= (1 << CHARS_FLAG);
     return 1;
@@ -156,20 +136,13 @@ static int8_t set_bdf_font_nglyphs(BdfBuilder *builder, BdfArgs bdf_args)
 
 static int8_t set_bdf_glyph_name(BdfBuilder *builder, BdfArgs bdf_args)
 {
-    if (bdf_args.argc != 1) {
-        return 0;
-    }
-
-    if (builder->state != WAITING_GLYPH_NAME) {
-        return 0;
-    }
+    if (bdf_args.argc != 1) { return 0; }
+    if (builder->state != WAITING_GLYPH_NAME) { return 0; }
 
     // Memory allocation for a new glyph
     builder->glyph_builder.current_glyph = calloc(1, sizeof(Glyph));
     Glyph *glyph = builder->glyph_builder.current_glyph;
-    if (!glyph) {
-        return 0;
-    }
+    if (!glyph) { return 0; }
 
     char *glyph_name = bdf_args.argv[0];
     glyph->name = malloc(strlen(glyph_name) + 1);
@@ -187,13 +160,9 @@ static int8_t set_bdf_glyph_name(BdfBuilder *builder, BdfArgs bdf_args)
 
 static int8_t set_bdf_glyph_encoding(BdfBuilder *builder, BdfArgs bdf_args)
 {
-    if (bdf_args.argc != 1) {
-        return 0;
-    }
+    if (bdf_args.argc != 1) { return 0; }
 
-    if (builder->state != WAITING_GLYPH_SETTINGS) {
-        return 0;
-    }
+    if (builder->state != WAITING_GLYPH_SETTINGS) { return 0; }
 
     char *encoding_token = bdf_args.argv[0];
     Glyph *glyph = builder->glyph_builder.current_glyph;
@@ -206,9 +175,7 @@ static int8_t set_bdf_glyph_encoding(BdfBuilder *builder, BdfArgs bdf_args)
 
 static int8_t set_bdf_glyph_dwidth(BdfBuilder *builder, BdfArgs bdf_args)
 {
-    if (bdf_args.argc != 2) {
-        return 0;
-    }
+    if (bdf_args.argc != 2) { return 0; }
 
     if (builder->state != WAITING_GLYPH_SETTINGS) {
         printf("%d\n", builder->state);
@@ -228,13 +195,8 @@ static int8_t set_bdf_glyph_dwidth(BdfBuilder *builder, BdfArgs bdf_args)
 
 static int8_t set_bdf_glyph_bbx(BdfBuilder *builder, BdfArgs bdf_args)
 {
-    if (bdf_args.argc != 4) {
-        return 0;
-    }
-
-    if (builder->state != WAITING_GLYPH_SETTINGS) {
-        return 0;
-    }
+    if (bdf_args.argc != 4) { return 0; }
+    if (builder->state != WAITING_GLYPH_SETTINGS) { return 0; }
 
     int32_t BBw = atoi(bdf_args.argv[0]);
     int32_t BBh = atoi(bdf_args.argv[1]);
@@ -251,13 +213,8 @@ static int8_t set_bdf_glyph_bbx(BdfBuilder *builder, BdfArgs bdf_args)
 
 static int8_t set_bdf_glyph_bitmap(BdfBuilder *builder, BdfArgs bdf_args)
 {
-    if (bdf_args.argc != 0) {
-        return 0;
-    }
-
-    if (builder->state != WAITING_GLYPH_BITMAP) {
-        return 0;
-    }
+    if (bdf_args.argc != 0) { return 0; }
+    if (builder->state != WAITING_GLYPH_BITMAP) { return 0; }
 
     Glyph *glyph = builder->glyph_builder.current_glyph;
     
@@ -265,9 +222,7 @@ static int8_t set_bdf_glyph_bitmap(BdfBuilder *builder, BdfArgs bdf_args)
     int32_t padding = compute_glyph_padding(glyph);
     int32_t row_length = (padding + glyph->bbx.BBw) / CHAR_BIT;
     glyph->bitmap = calloc(row_length * glyph->bbx.BBh, sizeof(*glyph->bitmap));
-    if (!glyph->bitmap) {
-        return 0;
-    }
+    if (!glyph->bitmap) { return 0; }
 
     // Reading glyph's bitmap
     for (int i = 0; i < glyph->bbx.BBh; i++) {
@@ -288,22 +243,15 @@ static int8_t set_bdf_glyph_bitmap(BdfBuilder *builder, BdfArgs bdf_args)
 
 static int8_t add_bdf_glyph(BdfBuilder *builder, BdfArgs bdf_args)
 {
-    if (bdf_args.argc != 0) {
-        return 0;
-    }
-
-    if (builder->state != END_READING_GLYPH) {
-        return 0;
-    }
+    if (bdf_args.argc != 0) { return 0; }
+    if (builder->state != END_READING_GLYPH) { return 0; }
 
     Bdf *font = builder->file;
     Glyph *glyph = builder->glyph_builder.current_glyph;
 
     // Memory allocation for glyph key (encoding)
     int16_t *encoding_key = malloc(sizeof(*encoding_key));
-    if (!encoding_key) {
-        return 0;
-    }
+    if (!encoding_key) { return 0; }
     *encoding_key = glyph->encoding;
 
     Glyph *old_glyph = put(font->glyphs, encoding_key, glyph, cmp_hash_key_bdf_glyph);
@@ -326,13 +274,9 @@ static int8_t add_bdf_glyph(BdfBuilder *builder, BdfArgs bdf_args)
 
 static int8_t end_bdf_font(BdfBuilder *builder, BdfArgs bdf_args)
 {
-    if (bdf_args.argc != 0) {
-        return 0;
-    }
+    if (bdf_args.argc != 0) { return 0; }
 
-    if (builder->state != CLOSING_STATE) {
-        return 0;
-    }
+    if (builder->state != CLOSING_STATE) { return 0; }
 
     builder->font_flags |= (1 << ENDFONT_FLAG);
     return 1;
@@ -362,9 +306,9 @@ static TrieNode *create_bdf_dictionary(void)
 static void bdf_change_state(BdfBuilder *builder)
 {
     switch (builder->font_flags) {
-        case 0: {builder->state = INIT_STATE; break;}
-        case 1: {builder->state = WAITING_FONT_NAME; break;}
-        case 3: {builder->state = WAITING_NGLYPHS; break;}
+        case 0: { builder->state = INIT_STATE; break; }
+        case 1: { builder->state = WAITING_FONT_NAME; break; }
+        case 3: { builder->state = WAITING_NGLYPHS; break; }
         case 7: {
             int8_t glyph_flags = builder->glyph_builder.glyph_flags;
             if (glyph_flags == 0) {
@@ -378,15 +322,13 @@ static void bdf_change_state(BdfBuilder *builder)
             }
             break;
         }
-        case 15: {builder->state = CLOSING_STATE; break;}
+        case 15: { builder->state = CLOSING_STATE; break; }
     }
 }
 
 static void free_bdf_builder(BdfBuilder **addr_builder)
 {
-    if (!addr_builder || !*addr_builder) {
-        return;
-    }
+    if (!addr_builder || !*addr_builder) { return; }
 
     BdfBuilder *builder = *addr_builder;
     if (builder->fp) {
@@ -400,9 +342,7 @@ static void free_bdf_builder(BdfBuilder **addr_builder)
 static BdfBuilder *create_bdf_builder(Bdf *self)
 {
     BdfBuilder *builder = (self) ? calloc(1, sizeof(BdfBuilder)) : NULL;
-    if (!builder) {
-        return NULL;
-    }
+    if (!builder) { return NULL; }
     
     // File Opening (Read Mode)
     const char *path = get_app_file_path((const AppFile*)self);
@@ -441,9 +381,7 @@ Bdf *bdf_ctor(const char *path)
 {
     Bdf *file = (path) ? calloc(1, sizeof(Bdf)) : NULL;
     init_file_app((AppFile**)&file, path, &BdfFileVTable, BDF);
-    if (!file) {
-        return NULL;
-    }
+    if (!file) { return NULL; }
     // File Loading
     app_file_load((AppFile**)&file);
     return file;
@@ -475,9 +413,7 @@ void load_bdf(AppFile **self)
     while (SCANNING) {
         bdf_change_state(builder);
         char *bdf_input = read_file_line(builder->fp);
-        if (!bdf_input) {
-            break;
-        }
+        if (!bdf_input) { break; }
 
         // Get bdf attribute & argument
         char *space = strchr(bdf_input, ' ');

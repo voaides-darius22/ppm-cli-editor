@@ -65,9 +65,7 @@ int8_t *get_glyph_bitmap(const Glyph *self)
 
 int8_t does_bdf_glyph_fit(Ppm *img, int32_t origin_x, int32_t origin_y, Glyph *self)
 {
-    if (!self) {
-        return 0;
-    }
+    if (!self) { return 0; }
 
     int32_t bottom_left_corner_x = origin_x + self->bbx.BBxoff;
     int32_t bottom_left_corner_y = origin_y + self->bbx.BByoff;
@@ -78,7 +76,7 @@ int8_t does_bdf_glyph_fit(Ppm *img, int32_t origin_x, int32_t origin_y, Glyph *s
         return 0;
     }
 
-    if (top_right_corner_x >= get_ppm_width(img) || bottom_left_corner_y >= get_ppm_height(img)) {
+    if (top_right_corner_x >= get_img_width(img) || bottom_left_corner_y >= get_img_height(img)) {
         return 0;
     }
 
@@ -93,9 +91,7 @@ int32_t compute_glyph_padding(Glyph *self)
 
 uint8_t cmp_hash_key_bdf_glyph(const void *value_1, const void *value_2)
 {
-    if (!value_1 || !value_2) {
-        return 0;
-    }
+    if (!value_1 || !value_2) { return 0; }
 
     const HashTablePair *pair = value_1;
     const int16_t encoding_1 = *(const int16_t *)pair->key;
@@ -107,9 +103,7 @@ void free_glyph(void *self)
 {
     
     Glyph *glyph = (self) ? self : NULL;
-    if (!glyph) {
-        return;
-    }
+    if (!glyph) { return; }
     
     free(glyph->name);
     free(glyph->bitmap);

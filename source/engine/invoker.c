@@ -11,9 +11,7 @@ typedef struct Invoker {
 Invoker *invoker_ctor(void)
 {
     Invoker *invoker = calloc(1, sizeof(Invoker));
-    if (!invoker) {
-        return NULL;
-    }
+    if (!invoker) { return NULL; }
     
     invoker->undo_stack = create_slist();
     if (!invoker->undo_stack) {
@@ -31,9 +29,7 @@ Invoker *invoker_ctor(void)
 static void free_invoker_stack(SList **addr_stack)
 {
     SList *stack = (addr_stack) ? *addr_stack : NULL;
-    if (!stack) {
-        return;
-    }
+    if (!stack) { return; }
 
     while (!is_empty_slist(stack)) {
         Command *cmd = pop_slist(stack);
@@ -47,9 +43,7 @@ static void free_invoker_stack(SList **addr_stack)
 void invoker_dtor(Invoker **self)
 {
     Invoker *invoker = (self) ? *self : NULL;
-    if (!invoker) {
-        return;
-    }
+    if (!invoker) { return; }
 
     SList *undo_stack = invoker->undo_stack;
     SList *redo_stack = invoker->redo_stack;
@@ -61,9 +55,7 @@ void invoker_dtor(Invoker **self)
 
 void invoke(Command *cmd, Invoker *self)
 {
-    if (!cmd || !self) {
-        return;
-    }
+    if (!cmd || !self) { return; }
 
     int8_t exit_code = execute_cmd(cmd);
     // Checking if the command is undoable and its execute succeeded
@@ -83,9 +75,7 @@ void invoke(Command *cmd, Invoker *self)
 
 Command *pop_invoker_stack(Invoker *self, int8_t stack_type)
 {
-    if (!self) {
-        return NULL;
-    }
+    if (!self) { return NULL; }
     // Selecting invoker's stack (UNDO / REDO Stack)
     SList *stack = (stack_type == UNDO_STACK) ? self->undo_stack : self->redo_stack;
     return (Command*)pop_slist(stack);
@@ -93,9 +83,7 @@ Command *pop_invoker_stack(Invoker *self, int8_t stack_type)
 
 void push_invoker_stack(Invoker *self, int8_t stack_type, Command *cmd)
 {
-    if (!self || !cmd) {
-        return;
-    }
+    if (!self || !cmd) { return; }
     // Selecting invoker's stack (UNDO / REDO Stack)
     SList *stack = (stack_type == UNDO_STACK) ? self->undo_stack : self->redo_stack;
     push_slist(stack, (void*)cmd);

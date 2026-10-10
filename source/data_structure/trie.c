@@ -7,9 +7,7 @@
 TrieNode *create_trie_node(char character, uint8_t end, void *value)
 {
     TrieNode *new_node = calloc(1, sizeof(*new_node));
-    if (!new_node) {
-        return NULL;
-    }
+    if (!new_node) { return NULL; }
 
     new_node->character = character;
     new_node->end = end;
@@ -20,33 +18,25 @@ TrieNode *create_trie_node(char character, uint8_t end, void *value)
 
 uint32_t num_of_kids(const TrieNode *node)
 {
-    if (!node || !node->children) {
-        return 0;
-    }
+    if (!node || !node->children) { return 0; }
     return node->children->size;
 }
 
 void insert_child(TrieNode *parent, TrieNode *child)
 {
-    if (!parent || !child) {
-        return;
-    }
+    if (!parent || !child) { return; }
 
     if (!parent->children) {
         // Memory allocation for the children doubly linked list
         parent->children = create_dlist();
-        if (!parent->children) {
-            return;
-        }
+        if (!parent->children) { return; }
     }
     insert_dlist_node(parent->children, child, 0);
 }
 
 TrieNode *get_child(const TrieNode *root, char character)
 {
-    if (!root || !root->children) {
-        return NULL;
-    }
+    if (!root || !root->children) { return NULL; }
 
     DListNode *iter = root->children->front;
     while (iter) {
@@ -61,9 +51,7 @@ TrieNode *get_child(const TrieNode *root, char character)
 
 void insert_word(TrieNode *root, const char *word, void *value)
 {
-    if (!root || !word) {
-        return;
-    }
+    if (!root || !word) { return; }
 
     TrieNode *current_node = root;
     for (int i = 0; word[i] != '\0'; i++) {
@@ -80,16 +68,12 @@ void insert_word(TrieNode *root, const char *word, void *value)
 
 uint8_t contains_word(TrieNode *root, const char *word)
 {
-    if (!root || !word) {
-        return 0;
-    }
+    if (!root || !word) { return 0; }
 
     TrieNode *current_node = root;
     for (int i = 0; word[i] != '\0'; i++) {
         TrieNode *child = get_child(current_node, word[i]);
-        if (!child) {
-            return 0;
-        }
+        if (!child) { return 0; }
         current_node = child;
     }
     return (current_node->end) ? 1 : 0;
@@ -97,16 +81,12 @@ uint8_t contains_word(TrieNode *root, const char *word)
 
 void *get_word_value(TrieNode *root, const char *word)
 {
-    if (!root || !word) {
-        return NULL;
-    }
+    if (!root || !word) { return NULL; }
 
     TrieNode *current_node = root;
     for (int i = 0; word[i] != '\0'; i++) {
         TrieNode *child = get_child(current_node, word[i]);
-        if (!child) {
-            return NULL;
-        }
+        if (!child) { return NULL; }
         current_node = child;
     }
     return (current_node->end) ? current_node->value : NULL;
@@ -114,9 +94,7 @@ void *get_word_value(TrieNode *root, const char *word)
 
 TrieNode *free_trie(TrieNode *root, FreeHandler free_helper)
 {
-    if (!root) {
-        return NULL;
-    }
+    if (!root) { return NULL; }
 
     if (!root->children) {
         if (free_helper && root->value) {
@@ -146,9 +124,7 @@ void get_words(
     char *buffer, int32_t idx,
     const int8_t MAX_WORDS
 ){
-    if (!root || !words || !len || *len >= MAX_WORDS) {
-        return;
-    }
+    if (!root || !words || !len || *len >= MAX_WORDS) { return; }
 
     // Writing the character in buffer 
     buffer[idx] = root->character;
@@ -165,9 +141,7 @@ void get_words(
     }
 
     // Checking if the node has children
-    if (!root->children) {
-        return;
-    }
+    if (!root->children) { return; }
 
     // Iterating through the parent's children
     for (DListNode *iter = root->children->front; iter != NULL; iter = iter->next) {

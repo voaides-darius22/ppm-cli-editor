@@ -6,18 +6,14 @@
 DListNode *create_dlist_node(void *value)
 {
     DListNode *new_node = calloc(1, sizeof(*new_node));
-    if (!new_node) {
-        return NULL;
-    }
+    if (!new_node) { return NULL; }
     new_node->value = value;
     return new_node;
 }
 
 void *free_dlist_node(DListNode *node)
 {
-    if (!node) {
-        return NULL;
-    }
+    if (!node) { return NULL; }
 
     void *tmp = node->value;
     free(node);
@@ -37,14 +33,10 @@ uint8_t is_empty_dlist(const DList *list)
 
 void insert_dlist_node(DList *list, void *value, int32_t pos)
 {
-    if (!list || pos < 0) {
-        return;
-    }
+    if (!list || pos < 0) { return; }
 
     DListNode *new_node = create_dlist_node(value);
-    if (!new_node) {
-        return;
-    }
+    if (!new_node) { return; }
 
     // Edge cases for inserting the new node
     if (is_empty_dlist(list)) {
@@ -73,9 +65,7 @@ void insert_dlist_node(DList *list, void *value, int32_t pos)
 
 DListNode *find_dlist_node(const DList *list, int32_t pos)
 {
-    if (!list || pos < 0 || pos >= list->size) {
-        return NULL;
-    }
+    if (!list || pos < 0 || pos >= list->size) { return NULL; }
 
     // Choosing the starting node to iterate through list
     uint32_t middle = list->size / 2;
@@ -96,9 +86,7 @@ DListNode *find_dlist_node(const DList *list, int32_t pos)
 void *remove_dlist_node(DList *list, int32_t pos)
 {
     DListNode *current_node = find_dlist_node(list, pos);
-    if (!current_node) {
-        return NULL;
-    }
+    if (!current_node) { return NULL; }
 
     void *tmp = current_node->value;
     if (!current_node->prev) {
@@ -120,9 +108,7 @@ void *remove_dlist_node(DList *list, int32_t pos)
 
 DList *free_dlist(DList *list, FreeHandler free_helper)
 {
-    if (!list) {
-        return NULL;
-    }
+    if (!list) { return NULL; }
 
     DListNode *iter = list->front, *tmp;
     while (iter) {
